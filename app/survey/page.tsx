@@ -43,7 +43,7 @@ export default function SurveyPage() {
     setScreen('survey')
   }
 
-  function handleAnswer(answer: boolean) {
+  function handleAnswer(answer: number) {
     const q = questions[currentIndex]
     saveAnswer(q.id, answer)
 

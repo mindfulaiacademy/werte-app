@@ -1,10 +1,10 @@
 import { QUESTIONS, VALUES, type Question } from '@/data/questions'
 
-const ANSWERS_KEY = 'wt_answers'
-const ORDER_KEY = 'wt_order'
-const INDEX_KEY = 'wt_index'
+const ANSWERS_KEY = 'wt_answers_v2'   // v2 = number scale; v1 was boolean
+const ORDER_KEY = 'wt_order_v2'
+const INDEX_KEY = 'wt_index_v2'
 
-export type Answers = Record<string, boolean>
+export type Answers = Record<string, number>  // questionId -> 1..5
 
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr]
@@ -22,7 +22,7 @@ export function getShuffledOrder(): string[] {
     try {
       return JSON.parse(stored) as string[]
     } catch {
-      // fall through to generate new
+      // fall through
     }
   }
   const shuffled = shuffleArray(QUESTIONS.map((q) => q.id))
@@ -36,10 +36,10 @@ export function getOrderedQuestions(): Question[] {
   return order.map((id) => map.get(id)!).filter(Boolean)
 }
 
-export function saveAnswer(questionId: string, answer: boolean): void {
+export function saveAnswer(questionId: string, value: number): void {
   if (typeof window === 'undefined') return
   const answers = getAnswers()
-  answers[questionId] = answer
+  answers[questionId] = value
   localStorage.setItem(ANSWERS_KEY, JSON.stringify(answers))
 }
 
@@ -73,21 +73,24 @@ export interface ScoreResult {
   valueKey: string
   valueName: string
   dimension: string
-  score: number
+  score: number   // average 1.0–5.0 (0 if unanswered)
   max: number
 }
 
 export function computeScores(answers: Answers): ScoreResult[] {
-  const counts: Record<string, number> = {}
-  for (const q of QUESTIONS) {
-    if (!(q.valueKey in counts)) counts[q.valueKey] = 0
-    if (answers[q.id] === true) counts[q.valueKey]++
-  }
-  return VALUES.map((v) => ({
-    valueKey: v.key,
-    valueName: v.name,
-    dimension: v.dimension,
-    score: counts[v.key] ?? 0,
-    max: 5,
-  }))
+  return VALUES.map((v) => {
+    const qs = QUESTIONS.filter((q) => q.valueKey === v.key)
+    const answered = qs.map((q) => answers[q.id]).filter((n) => typeof n === 'number')
+    const avg =
+      answered.length > 0
+        ? answered.reduce((sum, n) => sum + n, 0) / answered.length
+        : 0
+    return {
+      valueKey: v.key,
+      valueName: v.name,
+      dimension: v.dimension,
+      score: Math.round(avg * 10) / 10,
+      max: 5,
+    }
+  })
 }

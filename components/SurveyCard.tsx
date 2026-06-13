@@ -1,16 +1,31 @@
 'use client'
 
+import { useState } from 'react'
 import type { Question } from '@/data/questions'
 
 interface Props {
   question: Question
   current: number
   total: number
-  onAnswer: (answer: boolean) => void
+  onAnswer: (value: number) => void
 }
 
+const EMOJIS = ['😐', '🙂', '😊', '😄', '😍']
+const LABEL_LEFT = 'gar nicht wichtig'
+const LABEL_RIGHT = 'mega wichtig'
+
 export default function SurveyCard({ question, current, total, onAnswer }: Props) {
-  const progress = (current / total) * 100
+  const [selected, setSelected] = useState<number | null>(null)
+  const progress = ((current - 1) / total) * 100
+
+  function handleSelect(value: number) {
+    setSelected(value)
+    // slight delay so user sees the selection before card advances
+    setTimeout(() => {
+      setSelected(null)
+      onAnswer(value)
+    }, 180)
+  }
 
   return (
     <div className="flex flex-col min-h-screen" style={{ background: 'var(--bg)' }}>
@@ -35,7 +50,7 @@ export default function SurveyCard({ question, current, total, onAnswer }: Props
           className="rounded-2xl p-6 flex flex-col gap-6"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
         >
-          {/* Emoji */}
+          {/* Emoji anchor */}
           <div className="text-6xl text-center leading-none">{question.emoji}</div>
 
           {/* Prompt */}
@@ -48,32 +63,41 @@ export default function SurveyCard({ question, current, total, onAnswer }: Props
             {question.text}
           </p>
 
-          {/* Buttons */}
-          <div className="flex gap-3 mt-2">
-            <button
-              onClick={() => onAnswer(false)}
-              className="flex-1 py-4 rounded-xl font-bold text-lg transition-all active:scale-95"
-              style={{
-                background: 'var(--bg-card-inner)',
-                color: 'var(--text-muted)',
-                border: '2px solid var(--border)',
-                borderRadius: 'var(--btn-radius)',
-              }}
-            >
-              ✗ Nein
-            </button>
-            <button
-              onClick={() => onAnswer(true)}
-              className="flex-1 py-4 rounded-xl font-bold text-lg transition-all active:scale-95"
-              style={{
-                background: 'var(--accent)',
-                color: 'var(--accent-text)',
-                border: '2px solid var(--accent-2)',
-                borderRadius: 'var(--btn-radius)',
-              }}
-            >
-              ✓ Ja
-            </button>
+          {/* Scale */}
+          <div className="flex flex-col gap-2 mt-1">
+            <div className="flex justify-between gap-2">
+              {EMOJIS.map((emoji, i) => {
+                const value = i + 1
+                const isSelected = selected === value
+                return (
+                  <button
+                    key={value}
+                    onClick={() => handleSelect(value)}
+                    className="flex-1 flex flex-col items-center py-3 rounded-xl transition-all active:scale-95"
+                    style={{
+                      background: isSelected ? 'var(--accent)' : 'var(--bg-card-inner)',
+                      border: `2px solid ${isSelected ? 'var(--accent-2)' : 'var(--border)'}`,
+                      borderRadius: 'var(--btn-radius)',
+                      transform: isSelected ? 'scale(1.08)' : 'scale(1)',
+                    }}
+                  >
+                    <span className="text-2xl leading-none">{emoji}</span>
+                    <span
+                      className="text-xs font-bold mt-1"
+                      style={{ color: isSelected ? 'var(--accent-text)' : 'var(--text-muted)' }}
+                    >
+                      {value}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Scale labels */}
+            <div className="flex justify-between px-1">
+              <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{LABEL_LEFT}</span>
+              <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{LABEL_RIGHT}</span>
+            </div>
           </div>
         </div>
       </div>

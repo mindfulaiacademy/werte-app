@@ -39,7 +39,7 @@ function ScoreTile({ result }: { result: ScoreResult }) {
           />
         </div>
         <span className="text-xs font-bold tabular-nums" style={{ color: 'var(--text-muted)' }}>
-          {result.score}/{result.max}
+          {result.score.toFixed(1)} / 5
         </span>
       </div>
     </div>

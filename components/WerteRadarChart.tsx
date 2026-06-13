@@ -75,7 +75,7 @@ export default function WerteRadarChart({ scores }: Props) {
           dot={{ r: 4, fill: '#e6bc00', strokeWidth: 0 }}
         />
         <Tooltip
-          formatter={(value) => [`${value} / 5`, 'Score']}
+          formatter={(value) => [typeof value === 'number' ? `${value.toFixed(1)} / 5` : value, 'Score']}
           contentStyle={{
             background: '#ffffff',
             border: '1px solid #e5e7eb',
