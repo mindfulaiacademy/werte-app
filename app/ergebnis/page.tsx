@@ -15,7 +15,7 @@ const DIMENSION_LABELS: Record<string, string> = {
 
 const DIMENSION_COLORS: Record<string, string> = {
   IDENTITY: '#FFD21F',
-  COMMUNITY: '#22c55e',
+  COMMUNITY: '#ef4444',
   SOCIALITY: '#3b82f6',
 }
 
