@@ -16,7 +16,7 @@ const DIMENSION_LABELS: Record<string, string> = {
 const DIMENSION_COLORS: Record<string, string> = {
   IDENTITY: '#FFD21F',
   COMMUNITY: '#ef4444',
-  SOCIALITY: '#3b82f6',
+  SOCIALITY: '#14b8a6',
 }
 
 function ScoreTile({ result }: { result: ScoreResult }) {

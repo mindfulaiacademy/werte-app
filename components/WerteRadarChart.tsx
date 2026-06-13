@@ -17,7 +17,7 @@ interface Props {
 const DIMENSION_COLORS: Record<string, string> = {
   IDENTITY: '#FFD21F',
   COMMUNITY: '#ef4444',
-  SOCIALITY: '#3b82f6',
+  SOCIALITY: '#14b8a6',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
