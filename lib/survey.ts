@@ -72,11 +72,11 @@ export function resetSurvey(): void {
   localStorage.removeItem(INDEX_KEY)
 }
 
-// Returns 1, 2, or 3 based on how many answers have been saved
+// Returns the round just completed (1, 2, or 3)
 export function getRound(answers: Answers): 1 | 2 | 3 {
   const count = Object.keys(answers).length
-  if (count >= ROUND_SIZE * 2) return 3
-  if (count >= ROUND_SIZE) return 2
+  if (count >= TOTAL_QUESTIONS) return 3
+  if (count >= ROUND_SIZE * 2) return 2
   return 1
 }
 

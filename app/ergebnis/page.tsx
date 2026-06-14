@@ -30,25 +30,19 @@ const DIMENSION_COLORS: Record<string, string> = {
 const ROUND_CONFIG = {
   1: {
     label: 'Erste Einschätzung',
-    sublabel: 'Dein Profil nimmt Form an — noch unscharf.',
-    blur: 'blur(3px)',
-    opacity: 0.5,
-    nextLabel: 'Runde 2 starten → noch schärfer',
+    sublabel: 'Basiert auf 20 von 60 Fragen.',
+    nextLabel: 'Runde 2 starten',
     nextRound: true,
   },
   2: {
-    label: 'Profil wird schärfer',
-    sublabel: 'Du siehst mehr — eine Runde fehlt noch.',
-    blur: 'blur(1px)',
-    opacity: 0.75,
-    nextLabel: 'Runde 3 starten → vollständiges Profil',
+    label: 'Dein Profil wächst',
+    sublabel: 'Basiert auf 40 von 60 Fragen.',
+    nextLabel: 'Runde 3 starten',
     nextRound: true,
   },
   3: {
     label: 'Dein vollständiges Profil',
     sublabel: 'Alle 60 Fragen beantwortet.',
-    blur: 'none',
-    opacity: 1,
     nextLabel: null,
     nextRound: false,
   },
@@ -143,13 +137,7 @@ export default function ErgebnisPage() {
           Ergebnis Heatmap
         </p>
 
-        <div style={{
-          filter: config.blur,
-          opacity: config.opacity,
-          transition: 'filter 0.6s ease, opacity 0.6s ease',
-        }}>
-          <WerteRadarChart scores={scores} />
-        </div>
+        <WerteRadarChart scores={scores} />
 
         {/* Legend */}
         <div className="flex justify-center gap-4 pb-4 flex-wrap">
