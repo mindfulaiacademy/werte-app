@@ -81,11 +81,12 @@ export default function SurveyPage() {
               Finde es in 4 Minuten heraus
             </p>
             <h1 className="text-3xl font-black leading-tight mb-4" style={{ color: 'var(--text)' }}>
-              Welcher Wert steckt<br />am stärksten in dir?
+              Was ist dir wichtig?
             </h1>
-            <p className="text-base leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-              Kein Richtig oder Falsch — nur du und deine ehrliche Antwort.
+            <p className="text-xl font-bold mb-4" style={{ color: 'var(--text-muted)' }}>
+              Wirklich wichtig.
             </p>
+
           </div>
 
           <div
