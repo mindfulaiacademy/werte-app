@@ -99,12 +99,6 @@ export default function SurveyPage() {
                 <strong style={{ color: 'var(--text)' }}>Spontan antworten.</strong> Dein erster Gedanke ist der ehrlichste.
               </p>
             </div>
-            <div className="flex items-start gap-3">
-              <span className="text-xl">⏸️</span>
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                <strong style={{ color: 'var(--text)' }}>Jederzeit pausieren.</strong> Du kannst weitermachen, wo du aufgehört hast.
-              </p>
-            </div>
           </div>
         </div>
 
