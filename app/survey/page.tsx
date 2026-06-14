@@ -99,12 +99,6 @@ export default function SurveyPage() {
               </p>
             </div>
             <div className="flex items-start gap-3">
-              <span className="text-xl">🔒</span>
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                <strong style={{ color: 'var(--text)' }}>Nur für dich.</strong> Deine Antworten bleiben auf deinem Gerät.
-              </p>
-            </div>
-            <div className="flex items-start gap-3">
               <span className="text-xl">⏸️</span>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 <strong style={{ color: 'var(--text)' }}>Jederzeit pausieren.</strong> Du kannst weitermachen, wo du aufgehört hast.
