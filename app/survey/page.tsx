@@ -9,10 +9,12 @@ import {
   getCurrentIndex,
   saveAnswer,
   saveCurrentIndex,
+  ROUND_SIZE,
+  TOTAL_QUESTIONS,
 } from '@/lib/survey'
 import type { Question } from '@/data/questions'
 
-type Screen = 'start' | 'survey' | 'done'
+type Screen = 'start' | 'survey'
 
 export default function SurveyPage() {
   const router = useRouter()
@@ -24,37 +26,46 @@ export default function SurveyPage() {
     const qs = getOrderedQuestions()
     const idx = getCurrentIndex()
     const answers = getAnswers()
+    const answeredCount = Object.keys(answers).length
     setQuestions(qs)
 
-    // If already finished, go straight to result
-    if (Object.keys(answers).length >= qs.length) {
+    // All 60 done
+    if (answeredCount >= TOTAL_QUESTIONS) {
       router.replace('/ergebnis')
       return
     }
 
-    // If mid-survey, skip start screen
+    // Mid-round: resume where we left off, skip start screen
     if (idx > 0) {
+      setCurrentIndex(idx)
+      setScreen('survey')
+      return
+    }
+
+    // Start of a new round (20 or 40 done): go straight to ergebnis
+    // (user comes back here via "Runde X starten" button on ergebnis)
+    if (answeredCount === ROUND_SIZE || answeredCount === ROUND_SIZE * 2) {
       setCurrentIndex(idx)
       setScreen('survey')
     }
   }, [router])
 
-  function handleStart() {
-    setScreen('survey')
-  }
-
-  function handleAnswer(answer: number) {
+  function handleAnswer(value: number) {
     const q = questions[currentIndex]
-    saveAnswer(q.id, answer)
+    saveAnswer(q.id, value)
 
     const nextIndex = currentIndex + 1
     saveCurrentIndex(nextIndex)
 
-    if (nextIndex >= questions.length) {
+    const answeredSoFar = Object.keys(getAnswers()).length
+
+    // End of a round — go to result screen
+    if (answeredSoFar === ROUND_SIZE || answeredSoFar === ROUND_SIZE * 2 || answeredSoFar >= TOTAL_QUESTIONS) {
       router.push('/ergebnis')
-    } else {
-      setCurrentIndex(nextIndex)
+      return
     }
+
+    setCurrentIndex(nextIndex)
   }
 
   if (screen === 'start') {
@@ -70,8 +81,8 @@ export default function SurveyPage() {
               Was ist dir<br />wichtig?
             </h1>
             <p className="text-base leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-              60 kurze Fragen. Kein Richtig oder Falsch — nur du und deine ehrliche Antwort.
-              Das dauert ungefähr 15 Minuten.
+              20 kurze Fragen. Kein Richtig oder Falsch — nur du und deine ehrliche Antwort.
+              Das dauert ungefähr 4 Minuten.
             </p>
           </div>
 
@@ -101,7 +112,7 @@ export default function SurveyPage() {
         </div>
 
         <button
-          onClick={handleStart}
+          onClick={() => setScreen('survey')}
           className="w-full py-4 font-black text-lg rounded-xl transition-all active:scale-95"
           style={{
             background: 'var(--accent)',
@@ -118,12 +129,15 @@ export default function SurveyPage() {
   if (questions.length === 0) return null
 
   const currentQuestion = questions[currentIndex]
+  const answeredCount = Object.keys(getAnswers()).length
+  const roundStart = Math.floor(answeredCount / ROUND_SIZE) * ROUND_SIZE
+  const positionInRound = currentIndex - roundStart + 1
 
   return (
     <SurveyCard
       question={currentQuestion}
-      current={currentIndex + 1}
-      total={questions.length}
+      current={positionInRound}
+      total={ROUND_SIZE}
       onAnswer={handleAnswer}
     />
   )

@@ -3,7 +3,15 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import { getAnswers, computeScores, resetSurvey, type ScoreResult } from '@/lib/survey'
+import {
+  getAnswers,
+  computeScores,
+  resetSurvey,
+  getRound,
+  ROUND_SIZE,
+  TOTAL_QUESTIONS,
+  type ScoreResult,
+} from '@/lib/survey'
 
 const WerteRadarChart = dynamic(() => import('@/components/WerteRadarChart'), { ssr: false })
 
@@ -17,6 +25,33 @@ const DIMENSION_COLORS: Record<string, string> = {
   IDENTITY: '#FFD21F',
   COMMUNITY: '#ef4444',
   SOCIALITY: '#14b8a6',
+}
+
+const ROUND_CONFIG = {
+  1: {
+    label: 'Erste Einschätzung',
+    sublabel: 'Dein Profil nimmt Form an — noch unscharf.',
+    blur: 'blur(3px)',
+    opacity: 0.5,
+    nextLabel: 'Runde 2 starten → noch schärfer',
+    nextRound: true,
+  },
+  2: {
+    label: 'Profil wird schärfer',
+    sublabel: 'Du siehst mehr — eine Runde fehlt noch.',
+    blur: 'blur(1px)',
+    opacity: 0.75,
+    nextLabel: 'Runde 3 starten → vollständiges Profil',
+    nextRound: true,
+  },
+  3: {
+    label: 'Dein vollständiges Profil',
+    sublabel: 'Alle 60 Fragen beantwortet.',
+    blur: 'none',
+    opacity: 1,
+    nextLabel: null,
+    nextRound: false,
+  },
 }
 
 function ScoreTile({ result }: { result: ScoreResult }) {
@@ -39,7 +74,7 @@ function ScoreTile({ result }: { result: ScoreResult }) {
           />
         </div>
         <span className="text-xs font-bold tabular-nums" style={{ color: 'var(--text-muted)' }}>
-          {result.score.toFixed(1)} / 5
+          {result.answeredCount > 0 ? `${result.score.toFixed(1)} / 5` : '—'}
         </span>
       </div>
     </div>
@@ -49,6 +84,7 @@ function ScoreTile({ result }: { result: ScoreResult }) {
 export default function ErgebnisPage() {
   const router = useRouter()
   const [scores, setScores] = useState<ScoreResult[]>([])
+  const [round, setRound] = useState<1 | 2 | 3>(1)
 
   useEffect(() => {
     const answers = getAnswers()
@@ -57,6 +93,7 @@ export default function ErgebnisPage() {
       return
     }
     setScores(computeScores(answers))
+    setRound(getRound(answers))
   }, [router])
 
   function handleReset() {
@@ -64,32 +101,55 @@ export default function ErgebnisPage() {
     router.push('/survey')
   }
 
+  function handleNextRound() {
+    router.push('/survey')
+  }
+
   if (scores.length === 0) return null
 
+  const config = ROUND_CONFIG[round]
   const dimensions = ['IDENTITY', 'COMMUNITY', 'SOCIALITY'] as const
   const byDimension = (dim: string) => scores.filter((s) => s.dimension === dim)
+  const answeredTotal = scores.reduce((sum, s) => sum + s.answeredCount, 0)
 
   return (
     <div className="flex flex-col min-h-screen pb-10" style={{ background: 'var(--bg)' }}>
       {/* Header */}
       <div className="px-5 pt-10 pb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+            style={{ background: 'var(--accent)', color: 'var(--accent-text)' }}>
+            Runde {round} / 3
+          </span>
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            {answeredTotal} / {TOTAL_QUESTIONS} Fragen
+          </span>
+        </div>
         <h1 className="text-2xl font-black" style={{ color: 'var(--text)' }}>
-          Dein Werteprofil
+          {config.label}
         </h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-          Hier siehst du, was dir wirklich wichtig ist.
+          {config.sublabel}
         </p>
       </div>
 
       {/* Radar Chart */}
       <div
-        className="mx-5 rounded-2xl pt-4 pb-2"
+        className="mx-5 rounded-2xl pt-4 pb-2 overflow-hidden"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
       >
-        <p className="text-xs font-semibold uppercase tracking-widest text-center mb-2" style={{ color: 'var(--text-muted)' }}>
+        <p className="text-xs font-semibold uppercase tracking-widest text-center mb-2"
+          style={{ color: 'var(--text-muted)' }}>
           Ergebnis Heatmap
         </p>
-        <WerteRadarChart scores={scores} />
+
+        <div style={{
+          filter: config.blur,
+          opacity: config.opacity,
+          transition: 'filter 0.6s ease, opacity 0.6s ease',
+        }}>
+          <WerteRadarChart scores={scores} />
+        </div>
 
         {/* Legend */}
         <div className="flex justify-center gap-4 pb-4 flex-wrap">
@@ -122,17 +182,34 @@ export default function ErgebnisPage() {
 
       {/* CTAs */}
       <div className="flex flex-col gap-3 px-5 mt-8">
-        <button
-          disabled
-          className="w-full py-4 font-black text-lg rounded-xl opacity-40 cursor-not-allowed"
-          style={{
-            background: 'var(--text)',
-            color: 'var(--bg)',
-            borderRadius: 'var(--btn-radius)',
-          }}
-        >
-          Weiter zu Block 2 →
-        </button>
+        {config.nextRound && (
+          <button
+            onClick={handleNextRound}
+            className="w-full py-4 font-black text-lg rounded-xl transition-all active:scale-95"
+            style={{
+              background: 'var(--accent)',
+              color: 'var(--accent-text)',
+              borderRadius: 'var(--btn-radius)',
+            }}
+          >
+            {config.nextLabel}
+          </button>
+        )}
+
+        {!config.nextRound && (
+          <button
+            disabled
+            className="w-full py-4 font-black text-lg rounded-xl opacity-40 cursor-not-allowed"
+            style={{
+              background: 'var(--text)',
+              color: 'var(--bg)',
+              borderRadius: 'var(--btn-radius)',
+            }}
+          >
+            Weiter zu Block 2 →
+          </button>
+        )}
+
         <button
           onClick={handleReset}
           className="w-full py-3 font-semibold text-base rounded-xl transition-all active:scale-95"

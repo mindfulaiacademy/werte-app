@@ -1,10 +1,13 @@
 import { QUESTIONS, VALUES, type Question } from '@/data/questions'
 
-const ANSWERS_KEY = 'wt_answers_v2'   // v2 = number scale; v1 was boolean
+const ANSWERS_KEY = 'wt_answers_v2'
 const ORDER_KEY = 'wt_order_v2'
 const INDEX_KEY = 'wt_index_v2'
 
-export type Answers = Record<string, number>  // questionId -> 1..5
+export const ROUND_SIZE = 20
+export const TOTAL_QUESTIONS = 60
+
+export type Answers = Record<string, number> // questionId -> 1..5
 
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr]
@@ -69,12 +72,26 @@ export function resetSurvey(): void {
   localStorage.removeItem(INDEX_KEY)
 }
 
+// Returns 1, 2, or 3 based on how many answers have been saved
+export function getRound(answers: Answers): 1 | 2 | 3 {
+  const count = Object.keys(answers).length
+  if (count >= ROUND_SIZE * 2) return 3
+  if (count >= ROUND_SIZE) return 2
+  return 1
+}
+
+// Returns true if this round is the final one
+export function isFinalRound(round: 1 | 2 | 3): boolean {
+  return round === 3
+}
+
 export interface ScoreResult {
   valueKey: string
   valueName: string
   dimension: string
   score: number   // average 1.0–5.0 (0 if unanswered)
   max: number
+  answeredCount: number // out of 5
 }
 
 export function computeScores(answers: Answers): ScoreResult[] {
@@ -91,6 +108,7 @@ export function computeScores(answers: Answers): ScoreResult[] {
       dimension: v.dimension,
       score: Math.round(avg * 10) / 10,
       max: 5,
+      answeredCount: answered.length,
     }
   })
 }
