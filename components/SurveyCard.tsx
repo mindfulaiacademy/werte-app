@@ -73,12 +73,11 @@ export default function SurveyCard({ question, current, total, onAnswer }: Props
                   <button
                     key={value}
                     onClick={() => handleSelect(value)}
-                    className="flex-1 flex flex-col items-center py-3 rounded-xl transition-all active:scale-95"
+                    className={`flex-1 flex flex-col items-center py-3 rounded-xl transition-colors active:scale-95${isSelected ? ' tap-pop' : ''}`}
                     style={{
                       background: isSelected ? 'var(--accent)' : 'var(--bg-card-inner)',
                       border: `2px solid ${isSelected ? 'var(--accent-2)' : 'var(--border)'}`,
                       borderRadius: 'var(--btn-radius)',
-                      transform: isSelected ? 'scale(1.08)' : 'scale(1)',
                     }}
                   >
                     <span className="text-2xl leading-none">{emoji}</span>

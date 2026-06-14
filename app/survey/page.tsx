@@ -77,12 +77,14 @@ export default function SurveyPage() {
         <div className="flex-1 flex flex-col justify-center gap-8">
           <div className="text-center">
             <div className="text-6xl mb-6 emoji-bounce">🧭</div>
+            <p className="text-sm font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
+              Finde es in 4 Minuten heraus
+            </p>
             <h1 className="text-3xl font-black leading-tight mb-4" style={{ color: 'var(--text)' }}>
-              Was ist dir<br />wichtig?
+              Welcher Wert steckt<br />am stärksten in dir?
             </h1>
             <p className="text-base leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-              20 kurze Fragen. Kein Richtig oder Falsch — nur du und deine ehrliche Antwort.
-              Das dauert ungefähr 4 Minuten.
+              Kein Richtig oder Falsch — nur du und deine ehrliche Antwort.
             </p>
           </div>
 
