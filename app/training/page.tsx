@@ -1,0 +1,234 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { TRAINING_TOPICS, TRAINING_VALUE, getLevelForScore } from '@/data/training'
+import { getTrainingState, startTraining } from '@/lib/training'
+
+type Step = 'topic' | 'self' | 'target' | 'confirm'
+
+export default function TrainingSetupPage() {
+  const router = useRouter()
+  const [step, setStep] = useState<Step>('topic')
+  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null)
+  const [selfScore, setSelfScore] = useState(5)
+  const [targetScore, setTargetScore] = useState(7)
+
+  useEffect(() => {
+    const state = getTrainingState()
+    if (state) {
+      router.replace('/training/aktiv')
+    }
+  }, [router])
+
+  const selectedTopic = TRAINING_TOPICS.find((t) => t.id === selectedTopicId)
+  const selfLevel = selectedTopic?.levels[getLevelForScore(selfScore)]
+  const targetLevel = selectedTopic?.levels[getLevelForScore(targetScore)]
+
+  function handleStart() {
+    if (!selectedTopicId) return
+    startTraining(selectedTopicId, selfScore, targetScore)
+    router.push('/training/aktiv')
+  }
+
+  return (
+    <div className="flex flex-col min-h-screen px-5 pt-12 pb-10" style={{ background: 'var(--bg)' }}>
+      {/* Back */}
+      <button
+        onClick={() => (step === 'topic' ? router.push('/') : setStep(step === 'self' ? 'topic' : step === 'target' ? 'self' : 'target'))}
+        className="text-sm font-semibold mb-8 text-left"
+        style={{ color: 'var(--text-muted)' }}
+      >
+        ← Zurück
+      </button>
+
+      {/* Step: Topic selection */}
+      {step === 'topic' && (
+        <div className="flex flex-col gap-6 flex-1">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
+              {TRAINING_VALUE.emoji} {TRAINING_VALUE.name}
+            </p>
+            <h1 className="text-2xl font-black" style={{ color: 'var(--text)' }}>
+              Was willst du trainieren?
+            </h1>
+          </div>
+          <div className="flex flex-col gap-3">
+            {TRAINING_TOPICS.map((topic) => (
+              <button
+                key={topic.id}
+                onClick={() => {
+                  setSelectedTopicId(topic.id)
+                  setStep('self')
+                }}
+                className="w-full text-left rounded-xl p-4 transition-all active:scale-95 flex items-start gap-3"
+                style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+              >
+                <span className="text-2xl">{topic.emoji}</span>
+                <div>
+                  <p className="font-bold text-sm" style={{ color: 'var(--text)' }}>{topic.title}</p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{topic.subtitle}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Step: Self-assessment */}
+      {step === 'self' && selectedTopic && (
+        <div className="flex flex-col gap-6 flex-1">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
+              {selectedTopic.emoji} {selectedTopic.title}
+            </p>
+            <h1 className="text-2xl font-black mb-1" style={{ color: 'var(--text)' }}>
+              Wo stehst du gerade?
+            </h1>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              Sei ehrlich — kein Richtig oder Falsch.
+            </p>
+          </div>
+
+          <ScoreSelector value={selfScore} onChange={setSelfScore} />
+
+          {selfLevel && (
+            <div
+              className="rounded-xl p-4"
+              style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+            >
+              <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
+                Dein Level
+              </p>
+              <p className="font-black text-lg" style={{ color: 'var(--text)' }}>
+                {selfLevel.emoji} {selfLevel.label}
+              </p>
+            </div>
+          )}
+
+          <div className="mt-auto">
+            <button
+              onClick={() => setStep('target')}
+              className="w-full py-4 font-black text-lg rounded-xl transition-all active:scale-95"
+              style={{ background: 'var(--accent)', color: 'var(--accent-text)', borderRadius: 'var(--btn-radius)' }}
+            >
+              Weiter →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Step: Target */}
+      {step === 'target' && selectedTopic && (
+        <div className="flex flex-col gap-6 flex-1">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
+              {selectedTopic.emoji} {selectedTopic.title}
+            </p>
+            <h1 className="text-2xl font-black mb-1" style={{ color: 'var(--text)' }}>
+              Wo willst du in 7 Tagen sein?
+            </h1>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              Dein Ziel für diese Trainingswoche.
+            </p>
+          </div>
+
+          <ScoreSelector value={targetScore} onChange={setTargetScore} min={selfScore} />
+
+          {targetLevel && (
+            <div
+              className="rounded-xl p-4"
+              style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+            >
+              <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
+                Ziel-Level
+              </p>
+              <p className="font-black text-lg" style={{ color: 'var(--text)' }}>
+                {targetLevel.emoji} {targetLevel.label}
+              </p>
+            </div>
+          )}
+
+          <div className="mt-auto">
+            <button
+              onClick={() => setStep('confirm')}
+              className="w-full py-4 font-black text-lg rounded-xl transition-all active:scale-95"
+              style={{ background: 'var(--accent)', color: 'var(--accent-text)', borderRadius: 'var(--btn-radius)' }}
+            >
+              Weiter →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Step: Confirm */}
+      {step === 'confirm' && selectedTopic && selfLevel && targetLevel && (
+        <div className="flex flex-col gap-6 flex-1">
+          <div>
+            <h1 className="text-2xl font-black mb-1" style={{ color: 'var(--text)' }}>
+              Dein Trainingsplan
+            </h1>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              7 Tage · täglich 1 Micro-Challenge
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <SummaryRow label="Thema" value={`${selectedTopic.emoji} ${selectedTopic.title}`} />
+            <SummaryRow label="Dein Start" value={`${selfLevel.emoji} ${selfLevel.label} (${selfScore}/10)`} />
+            <SummaryRow label="Dein Ziel" value={`${targetLevel.emoji} ${targetLevel.label} (${targetScore}/10)`} />
+            <SummaryRow label="Dauer" value="7 Tage" />
+            <SummaryRow label="Punkte möglich" value="70 Punkte" />
+          </div>
+
+          <div className="mt-auto">
+            <button
+              onClick={handleStart}
+              className="w-full py-4 font-black text-lg rounded-xl transition-all active:scale-95"
+              style={{ background: 'var(--accent)', color: 'var(--accent-text)', borderRadius: 'var(--btn-radius)' }}
+            >
+              Training starten →
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ScoreSelector({ value, onChange, min = 0 }: { value: number; onChange: (v: number) => void; min?: number }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex justify-between text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
+        <span>0</span>
+        <span className="text-2xl font-black" style={{ color: 'var(--text)' }}>{value}</span>
+        <span>10</span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={10}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full h-3 rounded-full appearance-none cursor-pointer"
+        style={{ accentColor: 'var(--accent)' }}
+      />
+      <div className="flex justify-between text-xs" style={{ color: 'var(--text-muted)' }}>
+        <span>gar nicht</span>
+        <span>richtig stark</span>
+      </div>
+    </div>
+  )
+}
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      className="flex justify-between items-center rounded-xl px-4 py-3"
+      style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+    >
+      <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{label}</span>
+      <span className="text-sm font-bold" style={{ color: 'var(--text)' }}>{value}</span>
+    </div>
+  )
+}
