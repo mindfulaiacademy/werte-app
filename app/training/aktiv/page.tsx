@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { TRAINING_TOPICS, TRAINING_DURATION, POINTS_PER_DAY, getLevelForScore } from '@/data/training'
 import {
@@ -18,6 +18,8 @@ export default function TrainingAktivPage() {
   const router = useRouter()
   const [state, setState] = useState<TrainingState | null>(null)
   const [justCheckedIn, setJustCheckedIn] = useState<boolean | null>(null)
+  const [neuroOpen, setNeuroOpen] = useState(false)
+  const neuroRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const s = getTrainingState()
@@ -140,6 +142,30 @@ export default function TrainingAktivPage() {
           <p className="text-base leading-relaxed font-medium" style={{ color: 'var(--text)' }}>
             {level.challenge}
           </p>
+
+          {/* Neuro-Fakt */}
+          <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
+            <button
+              onClick={() => setNeuroOpen((o) => !o)}
+              className="flex items-center gap-2 text-sm font-semibold transition-all"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              <span>🧠</span>
+              <span>Warum hilft das?</span>
+              <span className="ml-auto text-xs" style={{ transform: neuroOpen ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.2s' }}>
+                ▾
+              </span>
+            </button>
+            <div
+              ref={neuroRef}
+              className="overflow-hidden transition-all duration-300"
+              style={{ maxHeight: neuroOpen ? '400px' : '0px', opacity: neuroOpen ? 1 : 0 }}
+            >
+              <p className="text-sm leading-relaxed mt-3" style={{ color: 'var(--text-muted)' }}>
+                {level.neuroFakt}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
