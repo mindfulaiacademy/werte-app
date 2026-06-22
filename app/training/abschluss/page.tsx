@@ -10,6 +10,7 @@ import {
   getMaxPoints,
   type TrainingState,
 } from '@/lib/training'
+import { getOrCreateSessionId } from '@/lib/sync'
 
 export default function TrainingAbschlussPage() {
   const router = useRouter()
@@ -37,6 +38,7 @@ export default function TrainingAbschlussPage() {
 
   function handleRestart() {
     resetTraining()
+    getOrCreateSessionId(true) // force new session ID for history
     router.push('/training')
   }
 

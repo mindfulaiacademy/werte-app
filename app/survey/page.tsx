@@ -13,7 +13,7 @@ import {
   TOTAL_QUESTIONS,
 } from '@/lib/survey'
 import type { Question } from '@/data/questions'
-import { syncToSupabase } from '@/lib/sync'
+import { syncToSupabase, getOrCreateSessionId } from '@/lib/sync'
 
 type Screen = 'start' | 'survey'
 
@@ -60,7 +60,8 @@ export default function SurveyPage() {
 
     const answeredSoFar = Object.keys(getAnswers()).length
 
-    syncToSupabase()
+    const roundCompleted = answeredSoFar === ROUND_SIZE ? 1 : answeredSoFar === ROUND_SIZE * 2 ? 2 : answeredSoFar >= TOTAL_QUESTIONS ? 3 : 0
+    syncToSupabase(roundCompleted)
 
     // End of a round — go to result screen
     if (answeredSoFar === ROUND_SIZE || answeredSoFar === ROUND_SIZE * 2 || answeredSoFar >= TOTAL_QUESTIONS) {
@@ -106,7 +107,7 @@ export default function SurveyPage() {
         </div>
 
         <button
-          onClick={() => setScreen('survey')}
+          onClick={() => { getOrCreateSessionId(); setScreen('survey') }}
           className="w-full py-4 font-black text-lg rounded-xl transition-all active:scale-95"
           style={{
             background: 'var(--accent)',

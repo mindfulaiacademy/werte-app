@@ -12,6 +12,7 @@ import {
   TOTAL_QUESTIONS,
   type ScoreResult,
 } from '@/lib/survey'
+import { getOrCreateSessionId } from '@/lib/sync'
 
 const WerteRadarChart = dynamic(() => import('@/components/WerteRadarChart'), { ssr: false })
 
@@ -92,6 +93,7 @@ export default function ErgebnisPage() {
 
   function handleReset() {
     resetSurvey()
+    getOrCreateSessionId(true) // force new session ID for history
     router.push('/survey')
   }
 

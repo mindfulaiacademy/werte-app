@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 
 const USER_ID_KEY = 'wt_user_id'
+const SESSION_ID_KEY = 'wt_session_id'
 
 const ANSWERS_KEY = 'wt_answers_v2'
 const ORDER_KEY = 'wt_order_v2'
@@ -17,51 +18,49 @@ export function getUserId(): string {
   return id
 }
 
-export async function syncToSupabase(): Promise<void> {
+// Each new survey attempt gets a fresh session_id
+// Called once at the start of a new round (when index === 0 and no answers yet)
+export function getOrCreateSessionId(forceNew = false): string {
+  if (typeof window === 'undefined') return ''
+  if (forceNew) {
+    const id = crypto.randomUUID()
+    localStorage.setItem(SESSION_ID_KEY, id)
+    return id
+  }
+  let id = localStorage.getItem(SESSION_ID_KEY)
+  if (!id) {
+    id = crypto.randomUUID()
+    localStorage.setItem(SESSION_ID_KEY, id)
+  }
+  return id
+}
+
+export function clearSessionId(): void {
+  if (typeof window === 'undefined') return
+  localStorage.removeItem(SESSION_ID_KEY)
+}
+
+export async function syncToSupabase(roundCompleted = 0): Promise<void> {
   if (typeof window === 'undefined') return
   try {
-    const id = getUserId()
+    const user_id = getUserId()
+    const session_id = getOrCreateSessionId()
     const answers = JSON.parse(localStorage.getItem(ANSWERS_KEY) || '{}')
     const question_order = JSON.parse(localStorage.getItem(ORDER_KEY) || '[]')
     const current_index = parseInt(localStorage.getItem(INDEX_KEY) || '0', 10)
     const training = JSON.parse(localStorage.getItem(TRAINING_KEY) || 'null')
 
     await supabase.from('user_sessions').upsert({
-      id,
+      session_id,
+      user_id,
       answers,
       question_order,
       current_index,
+      round_completed: roundCompleted,
       training,
       updated_at: new Date().toISOString(),
     })
   } catch {
     // sync is best-effort — never block the user
-  }
-}
-
-export async function loadFromSupabase(): Promise<boolean> {
-  if (typeof window === 'undefined') return false
-  try {
-    const id = getUserId()
-    const { data, error } = await supabase
-      .from('user_sessions')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (error || !data) return false
-
-    if (data.answers && Object.keys(data.answers).length > 0)
-      localStorage.setItem(ANSWERS_KEY, JSON.stringify(data.answers))
-    if (data.question_order && data.question_order.length > 0)
-      localStorage.setItem(ORDER_KEY, JSON.stringify(data.question_order))
-    if (data.current_index !== null)
-      localStorage.setItem(INDEX_KEY, String(data.current_index))
-    if (data.training)
-      localStorage.setItem(TRAINING_KEY, JSON.stringify(data.training))
-
-    return true
-  } catch {
-    return false
   }
 }
