@@ -10,6 +10,17 @@ function lsRemove(key: string): void {
   try { localStorage.removeItem(key) } catch { /* ignore */ }
 }
 
+function generateId(): string {
+  try {
+    return crypto.randomUUID()
+  } catch {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = Math.random() * 16 | 0
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16)
+    })
+  }
+}
+
 const USER_ID_KEY = 'wt_user_id'
 const SESSION_ID_KEY = 'wt_session_id'
 
@@ -22,7 +33,7 @@ export function getUserId(): string {
   if (typeof window === 'undefined') return ''
   let id = lsGet(USER_ID_KEY)
   if (!id) {
-    id = crypto.randomUUID()
+    id = generateId()
     lsSet(USER_ID_KEY, id)
   }
   return id
@@ -31,13 +42,13 @@ export function getUserId(): string {
 export function getOrCreateSessionId(forceNew = false): string {
   if (typeof window === 'undefined') return ''
   if (forceNew) {
-    const id = crypto.randomUUID()
+    const id = generateId()
     lsSet(SESSION_ID_KEY, id)
     return id
   }
   let id = lsGet(SESSION_ID_KEY)
   if (!id) {
-    id = crypto.randomUUID()
+    id = generateId()
     lsSet(SESSION_ID_KEY, id)
   }
   return id
