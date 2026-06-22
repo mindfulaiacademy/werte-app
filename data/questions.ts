@@ -46,14 +46,14 @@ export const QUESTIONS: Question[] = [
     valueKey: 'offenheit_kreativitaet',
     dimension: 'IDENTITY',
     emoji: '🌀',
-    text: 'Wenn du bei einer Aufgabe nicht weiterkommst — suchst du dann einen neuen Weg, oder gibst du auf?',
+    text: 'Wie wichtig ist es dir, bei Rückschlägen weiterzumachen und einen neuen Weg zu finden?',
   },
   {
     id: 'ok_3',
     valueKey: 'offenheit_kreativitaet',
     dimension: 'IDENTITY',
     emoji: '🔄',
-    text: 'Wenn du etwas falsch gemacht hast — lernst du daraus, oder ärgert dich das einfach nur?',
+    text: 'Wie wichtig ist es dir, aus Fehlern zu lernen — auch wenn es wehtut?',
   },
   {
     id: 'ok_4',
@@ -90,7 +90,7 @@ export const QUESTIONS: Question[] = [
     valueKey: 'respekt_disziplin',
     dimension: 'IDENTITY',
     emoji: '📋',
-    text: 'Wenn eine Aufgabe schwierig wird — machst du trotzdem weiter, oder schiebst du sie auf?',
+    text: 'Wie wichtig ist es dir, schwierige Aufgaben durchzuziehen — auch wenn du keine Lust hast?',
   },
   {
     id: 'rd_4',
@@ -127,7 +127,7 @@ export const QUESTIONS: Question[] = [
     valueKey: 'toleranz_geduld',
     dimension: 'IDENTITY',
     emoji: '🧩',
-    text: 'Wenn du etwas noch nicht verstehst — bleibst du neugierig, oder verlierst du die Lust?',
+    text: 'Wie wichtig ist es dir, neugierig zu bleiben — auch wenn du etwas noch nicht verstehst?',
   },
   {
     id: 'tg_4',
@@ -164,7 +164,7 @@ export const QUESTIONS: Question[] = [
     valueKey: 'begeisterung_fleiss',
     dimension: 'IDENTITY',
     emoji: '🌟',
-    text: 'Was würdest du lernen oder tun, auch wenn du kein Geld dafür bekommst und keine Note dafür kriegst?',
+    text: 'Wie wichtig ist es dir, Dinge zu tun, die dich wirklich begeistern — auch ohne Belohnung oder Note?',
   },
   {
     id: 'bf_4',
@@ -194,7 +194,7 @@ export const QUESTIONS: Question[] = [
     valueKey: 'fokus_aufmerksamkeit',
     dimension: 'IDENTITY',
     emoji: '🔍',
-    text: 'Wenn du etwas lernst oder machst — machst du es richtig und genau, oder eher schnell und fertig?',
+    text: 'Wie wichtig ist es dir, Dinge wirklich genau zu machen — statt sie einfach schnell zu erledigen?',
   },
   {
     id: 'fa_3',
@@ -261,7 +261,7 @@ export const QUESTIONS: Question[] = [
     valueKey: 'wertschaetzung_dankbarkeit',
     dimension: 'COMMUNITY',
     emoji: '💌',
-    text: 'Hast du jemandem schon mal gesagt, was du an ihm oder ihr wirklich schätzt — nicht weil du musstest, sondern weil du es wolltest?',
+    text: 'Wie wichtig ist es dir, Menschen zu sagen, was du an ihnen schätzt — einfach so, ohne besonderen Anlass?',
   },
   {
     id: 'wd_2',
@@ -282,7 +282,7 @@ export const QUESTIONS: Question[] = [
     valueKey: 'wertschaetzung_dankbarkeit',
     dimension: 'COMMUNITY',
     emoji: '🎁',
-    text: 'Freust du dich mehr, wenn du jemandem etwas Gutes tust — oder wenn du selbst etwas bekommst?',
+    text: 'Wie wichtig ist es dir, anderen etwas Gutes zu tun — auch ohne etwas dafür zu bekommen?',
   },
   {
     id: 'wd_5',
@@ -312,7 +312,7 @@ export const QUESTIONS: Question[] = [
     valueKey: 'anteilnahme_solidaritaet',
     dimension: 'COMMUNITY',
     emoji: '🌧️',
-    text: 'Hast du schon mal deine eigene Zeit oder Energie gegeben, um jemandem zu helfen — ohne etwas dafür zu erwarten?',
+    text: 'Wie wichtig ist es dir, anderen deine Zeit oder Energie zu geben — auch ohne etwas dafür zu erwarten?',
   },
   {
     id: 'as_4',
@@ -335,7 +335,7 @@ export const QUESTIONS: Question[] = [
     valueKey: 'freundschaft_hilfsbereitschaft',
     dimension: 'COMMUNITY',
     emoji: '🤝',
-    text: 'Hast du Menschen in deinem Leben, auf die du dich wirklich verlassen kannst — und die sich auf dich verlassen können?',
+    text: 'Wie wichtig ist es dir, Menschen in deinem Leben zu haben, auf die du dich wirklich verlassen kannst — und umgekehrt?',
   },
   {
     id: 'fh_2',
@@ -349,7 +349,7 @@ export const QUESTIONS: Question[] = [
     valueKey: 'freundschaft_hilfsbereitschaft',
     dimension: 'COMMUNITY',
     emoji: '🏆',
-    text: 'Ist es dir wichtiger, dass dein Team gewinnt — oder dass du persönlich der Beste bist?',
+    text: 'Wie wichtig ist es dir, dass dein Team als Ganzes erfolgreich ist — nicht nur du selbst?',
   },
   {
     id: 'fh_4',
@@ -386,7 +386,7 @@ export const QUESTIONS: Question[] = [
     valueKey: 'fuersorge_unterstuetzung',
     dimension: 'COMMUNITY',
     emoji: '🏠',
-    text: 'Was bedeutet für dich ein Ort, an dem du dich sicher und wohl fühlst? Schaffst du so einen Ort auch für andere?',
+    text: 'Wie wichtig ist es dir, für andere Menschen einen Raum zu schaffen, in dem sie sich sicher und wohl fühlen?',
   },
   {
     id: 'fu_4',
@@ -416,14 +416,14 @@ export const QUESTIONS: Question[] = [
     valueKey: 'vertrauen_verantwortung',
     dimension: 'SOCIALITY',
     emoji: '🌳',
-    text: 'Glaubst du, dass deine Entscheidungen — was du kaufst, isst, postest — andere Menschen auf der Welt beeinflussen?',
+    text: 'Wie wichtig ist es dir, bei deinen Entscheidungen — was du kaufst, isst, postest — an andere zu denken?',
   },
   {
     id: 'vv_3',
     valueKey: 'vertrauen_verantwortung',
     dimension: 'SOCIALITY',
     emoji: '♻️',
-    text: 'Denkst du manchmal daran, wie dein Alltag die Umwelt oder Menschen in anderen Ländern betrifft?',
+    text: 'Wie wichtig ist es dir, im Alltag bewusst daran zu denken, wie dein Verhalten andere Menschen und die Umwelt betrifft?',
   },
   {
     id: 'vv_4',
@@ -446,7 +446,7 @@ export const QUESTIONS: Question[] = [
     valueKey: 'mut_rechenschaft',
     dimension: 'SOCIALITY',
     emoji: '🦁',
-    text: 'Gibt es etwas in der Welt, das dich wirklich wütend macht — eine Ungerechtigkeit, ein Problem? Und was tust du damit?',
+    text: 'Wie wichtig ist es dir, bei Ungerechtigkeiten nicht wegzuschauen — sondern etwas zu tun?',
   },
   {
     id: 'mr_2',
@@ -467,13 +467,13 @@ export const QUESTIONS: Question[] = [
     valueKey: 'mut_rechenschaft',
     dimension: 'SOCIALITY',
     emoji: '🌊',
-    text: 'Glaubst du, dass du — als einzelne Person — wirklich etwas in der Welt verändern kannst?',
+    text: 'Wie wichtig ist es dir, als einzelne Person aktiv etwas in der Welt zu verändern?',
   },
   {
     id: 'mr_5',
     valueKey: 'mut_rechenschaft',
     dimension: 'SOCIALITY',
     emoji: '🕊️',
-    text: 'Wenn du an die Welt in 20 Jahren denkst — was möchtest du, dass man über dich sagt? Was hast du beigetragen?',
+    text: 'Wie wichtig ist es dir, im Leben einen Beitrag zu leisten — etwas zu hinterlassen, das über dich hinausgeht?',
   },
 ]

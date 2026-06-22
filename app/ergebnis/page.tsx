@@ -184,6 +184,21 @@ export default function ErgebnisPage() {
           </button>
         )}
 
+        {config.nextRound && (
+          <button
+            onClick={() => router.push('/training')}
+            className="w-full py-3 font-semibold text-base rounded-xl transition-all active:scale-95"
+            style={{
+              background: 'var(--bg-card)',
+              color: 'var(--text)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--btn-radius)',
+            }}
+          >
+            Abschließen und Werte-Training starten
+          </button>
+        )}
+
         {!config.nextRound && (
           <button
             disabled
@@ -194,7 +209,7 @@ export default function ErgebnisPage() {
               borderRadius: 'var(--btn-radius)',
             }}
           >
-            Weiter zu Block 2 →
+            Weiter zu WOOP!E Werte-Training →
           </button>
         )}
 
