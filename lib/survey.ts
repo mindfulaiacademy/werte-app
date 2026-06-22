@@ -9,6 +9,16 @@ export const TOTAL_QUESTIONS = 60
 
 export type Answers = Record<string, number> // questionId -> 1..5
 
+function lsGet(key: string): string | null {
+  try { return localStorage.getItem(key) } catch { return null }
+}
+function lsSet(key: string, value: string): void {
+  try { localStorage.setItem(key, value) } catch { /* incognito or storage full */ }
+}
+function lsRemove(key: string): void {
+  try { localStorage.removeItem(key) } catch { /* ignore */ }
+}
+
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
@@ -20,7 +30,7 @@ function shuffleArray<T>(arr: T[]): T[] {
 
 export function getShuffledOrder(): string[] {
   if (typeof window === 'undefined') return QUESTIONS.map((q) => q.id)
-  const stored = localStorage.getItem(ORDER_KEY)
+  const stored = lsGet(ORDER_KEY)
   if (stored) {
     try {
       return JSON.parse(stored) as string[]
@@ -29,7 +39,7 @@ export function getShuffledOrder(): string[] {
     }
   }
   const shuffled = shuffleArray(QUESTIONS.map((q) => q.id))
-  localStorage.setItem(ORDER_KEY, JSON.stringify(shuffled))
+  lsSet(ORDER_KEY, JSON.stringify(shuffled))
   return shuffled
 }
 
@@ -43,13 +53,13 @@ export function saveAnswer(questionId: string, value: number): void {
   if (typeof window === 'undefined') return
   const answers = getAnswers()
   answers[questionId] = value
-  localStorage.setItem(ANSWERS_KEY, JSON.stringify(answers))
+  lsSet(ANSWERS_KEY, JSON.stringify(answers))
 }
 
 export function getAnswers(): Answers {
   if (typeof window === 'undefined') return {}
   try {
-    return JSON.parse(localStorage.getItem(ANSWERS_KEY) || '{}') as Answers
+    return JSON.parse(lsGet(ANSWERS_KEY) || '{}') as Answers
   } catch {
     return {}
   }
@@ -57,19 +67,19 @@ export function getAnswers(): Answers {
 
 export function saveCurrentIndex(index: number): void {
   if (typeof window === 'undefined') return
-  localStorage.setItem(INDEX_KEY, String(index))
+  lsSet(INDEX_KEY, String(index))
 }
 
 export function getCurrentIndex(): number {
   if (typeof window === 'undefined') return 0
-  return parseInt(localStorage.getItem(INDEX_KEY) || '0', 10)
+  return parseInt(lsGet(INDEX_KEY) || '0', 10)
 }
 
 export function resetSurvey(): void {
   if (typeof window === 'undefined') return
-  localStorage.removeItem(ANSWERS_KEY)
-  localStorage.removeItem(ORDER_KEY)
-  localStorage.removeItem(INDEX_KEY)
+  lsRemove(ANSWERS_KEY)
+  lsRemove(ORDER_KEY)
+  lsRemove(INDEX_KEY)
 }
 
 // Returns the round just completed (1, 2, or 3)

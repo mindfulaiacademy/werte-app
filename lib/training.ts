@@ -2,6 +2,16 @@ import { TRAINING_DURATION, POINTS_PER_DAY } from '@/data/training'
 
 const TRAINING_KEY = 'wt_training_v1'
 
+function lsGet(key: string): string | null {
+  try { return localStorage.getItem(key) } catch { return null }
+}
+function lsSet(key: string, value: string): void {
+  try { localStorage.setItem(key, value) } catch { /* incognito or storage full */ }
+}
+function lsRemove(key: string): void {
+  try { localStorage.removeItem(key) } catch { /* ignore */ }
+}
+
 export interface TrainingState {
   topicId: string
   selfScore: number
@@ -13,7 +23,7 @@ export interface TrainingState {
 export function getTrainingState(): TrainingState | null {
   if (typeof window === 'undefined') return null
   try {
-    const raw = localStorage.getItem(TRAINING_KEY)
+    const raw = lsGet(TRAINING_KEY)
     return raw ? (JSON.parse(raw) as TrainingState) : null
   } catch {
     return null
@@ -22,7 +32,7 @@ export function getTrainingState(): TrainingState | null {
 
 export function saveTrainingState(state: TrainingState): void {
   if (typeof window === 'undefined') return
-  localStorage.setItem(TRAINING_KEY, JSON.stringify(state))
+  lsSet(TRAINING_KEY, JSON.stringify(state))
 }
 
 export function startTraining(topicId: string, selfScore: number, targetScore: number): TrainingState {
@@ -39,7 +49,7 @@ export function startTraining(topicId: string, selfScore: number, targetScore: n
 
 export function resetTraining(): void {
   if (typeof window === 'undefined') return
-  localStorage.removeItem(TRAINING_KEY)
+  lsRemove(TRAINING_KEY)
 }
 
 export function getDayIndex(startDate: string): number {
