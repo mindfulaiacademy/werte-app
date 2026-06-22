@@ -13,6 +13,7 @@ import {
   TOTAL_QUESTIONS,
 } from '@/lib/survey'
 import type { Question } from '@/data/questions'
+import { syncToSupabase } from '@/lib/sync'
 
 type Screen = 'start' | 'survey'
 
@@ -58,6 +59,8 @@ export default function SurveyPage() {
     saveCurrentIndex(nextIndex)
 
     const answeredSoFar = Object.keys(getAnswers()).length
+
+    syncToSupabase()
 
     // End of a round — go to result screen
     if (answeredSoFar === ROUND_SIZE || answeredSoFar === ROUND_SIZE * 2 || answeredSoFar >= TOTAL_QUESTIONS) {

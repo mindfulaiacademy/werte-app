@@ -13,6 +13,7 @@ import {
   getMaxPoints,
   type TrainingState,
 } from '@/lib/training'
+import { syncToSupabase } from '@/lib/sync'
 
 export default function TrainingAktivPage() {
   const router = useRouter()
@@ -48,6 +49,7 @@ export default function TrainingAktivPage() {
     const updated = checkinToday(state, done)
     setState(updated)
     setJustCheckedIn(done)
+    syncToSupabase()
 
     if (isTrainingComplete(updated)) {
       setTimeout(() => router.push('/training/abschluss'), 1200)

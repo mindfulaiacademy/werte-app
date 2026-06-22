@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { TRAINING_TOPICS, TRAINING_VALUE, getLevelForScore } from '@/data/training'
 import { getTrainingState, startTraining } from '@/lib/training'
+import { syncToSupabase } from '@/lib/sync'
 
 type Step = 'topic' | 'self' | 'target' | 'confirm'
 
@@ -28,6 +29,7 @@ export default function TrainingSetupPage() {
   function handleStart() {
     if (!selectedTopicId) return
     startTraining(selectedTopicId, selfScore, targetScore)
+    syncToSupabase()
     router.push('/training/aktiv')
   }
 
