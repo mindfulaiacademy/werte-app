@@ -21,6 +21,13 @@ function generateId(): string {
   }
 }
 
+const DEMO_KEY = 'wt_demo'
+
+export function isDemoMode(): boolean {
+  if (typeof window === 'undefined') return false
+  return lsGet(DEMO_KEY) === 'true'
+}
+
 const USER_ID_KEY = 'wt_user_id'
 const SESSION_ID_KEY = 'wt_session_id'
 

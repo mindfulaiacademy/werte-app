@@ -13,7 +13,7 @@ import {
   getMaxPoints,
   type TrainingState,
 } from '@/lib/training'
-import { syncToSupabase } from '@/lib/sync'
+import { syncToSupabase, isDemoMode } from '@/lib/sync'
 
 export default function TrainingAktivPage() {
   const router = useRouter()
@@ -38,8 +38,11 @@ export default function TrainingAktivPage() {
 
   const levelIndex = getLevelForScore(state.selfScore)
   const level = topic.levels[levelIndex]
-  const dayIndex = getDayIndex(state.startDate)
-  const alreadyDone = hasCheckedInToday(state)
+  const demoMode = isDemoMode()
+  const dayIndex = demoMode
+    ? Math.max(0, state.checkins.findIndex((c) => c === null) === -1 ? TRAINING_DURATION - 1 : state.checkins.findIndex((c) => c === null))
+    : getDayIndex(state.startDate)
+  const alreadyDone = demoMode ? state.checkins[dayIndex] !== null : hasCheckedInToday(state)
   const todayResult = state.checkins[dayIndex]
   const totalPoints = getTotalPoints(state)
   const maxPoints = getMaxPoints()
@@ -73,6 +76,11 @@ export default function TrainingAktivPage() {
           <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
             Tag {dayIndex + 1} / {TRAINING_DURATION}
           </span>
+          {demoMode && (
+            <span className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ background: '#f97316', color: '#fff' }}>
+              Demo
+            </span>
+          )}
         </div>
         <h1 className="text-2xl font-black" style={{ color: 'var(--text)' }}>
           {topic.emoji} {topic.title}
