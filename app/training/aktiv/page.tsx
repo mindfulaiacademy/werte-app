@@ -49,12 +49,12 @@ export default function TrainingAktivPage() {
 
   function handleCheckin(done: boolean) {
     if (!state || alreadyDone) return
-    const updated = checkinToday(state, done)
+    const updated = checkinToday(state, done, demoMode ? dayIndex : undefined)
     setState(updated)
     setJustCheckedIn(done)
     syncToSupabase()
 
-    if (isTrainingComplete(updated)) {
+    if (isTrainingComplete(updated, demoMode ? dayIndex : undefined)) {
       setTimeout(() => router.push('/training/abschluss'), 1200)
     }
   }

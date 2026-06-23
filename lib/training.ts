@@ -64,16 +64,16 @@ export function hasCheckedInToday(state: TrainingState): boolean {
   return state.checkins[day] !== null
 }
 
-export function checkinToday(state: TrainingState, done: boolean): TrainingState {
-  const day = getDayIndex(state.startDate)
+export function checkinToday(state: TrainingState, done: boolean, dayOverride?: number): TrainingState {
+  const day = dayOverride !== undefined ? dayOverride : getDayIndex(state.startDate)
   const updated = { ...state, checkins: [...state.checkins] }
   updated.checkins[day] = done
   saveTrainingState(updated)
   return updated
 }
 
-export function isTrainingComplete(state: TrainingState): boolean {
-  const day = getDayIndex(state.startDate)
+export function isTrainingComplete(state: TrainingState, dayOverride?: number): boolean {
+  const day = dayOverride !== undefined ? dayOverride : getDayIndex(state.startDate)
   return day === TRAINING_DURATION - 1 && state.checkins[day] !== null
 }
 
