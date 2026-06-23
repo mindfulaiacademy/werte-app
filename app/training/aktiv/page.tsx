@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { TRAINING_TOPICS, TRAINING_DURATION, POINTS_PER_DAY, getLevelForScore } from '@/data/training'
 import {
   getTrainingState,
+  saveTrainingState,
   checkinToday,
   getDayIndex,
   hasCheckedInToday,
@@ -49,12 +50,23 @@ export default function TrainingAktivPage() {
 
   function handleCheckin(done: boolean) {
     if (!state || alreadyDone) return
-    const updated = checkinToday(state, done, demoMode ? dayIndex : undefined)
+
+    if (demoMode) {
+      const updated = { ...state, checkins: Array(TRAINING_DURATION).fill(done) }
+      saveTrainingState(updated)
+      setState(updated)
+      setJustCheckedIn(done)
+      syncToSupabase()
+      setTimeout(() => router.push('/training/abschluss'), 1200)
+      return
+    }
+
+    const updated = checkinToday(state, done)
     setState(updated)
     setJustCheckedIn(done)
     syncToSupabase()
 
-    if (isTrainingComplete(updated, demoMode ? dayIndex : undefined)) {
+    if (isTrainingComplete(updated)) {
       setTimeout(() => router.push('/training/abschluss'), 1200)
     }
   }
