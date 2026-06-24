@@ -14,6 +14,8 @@ import {
 } from '@/lib/survey'
 import { getOrCreateSessionId } from '@/lib/sync'
 
+const DEMO_KEY = 'wt_demo'
+
 const WerteRadarChart = dynamic(() => import('@/components/WerteRadarChart'), { ssr: false })
 
 const DIMENSION_LABELS: Record<string, string> = {
@@ -186,34 +188,21 @@ export default function ErgebnisPage() {
           </button>
         )}
 
-        {config.nextRound && (
-          <button
-            onClick={() => router.push('/training')}
-            className="w-full py-3 font-semibold text-base rounded-xl transition-all active:scale-95"
-            style={{
-              background: 'var(--bg-card)',
-              color: 'var(--text)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--btn-radius)',
-            }}
-          >
-            Abschließen und Werte-Training starten
-          </button>
-        )}
-
-        {!config.nextRound && (
-          <button
-            disabled
-            className="w-full py-4 font-black text-lg rounded-xl opacity-40 cursor-not-allowed"
-            style={{
-              background: 'var(--text)',
-              color: 'var(--bg)',
-              borderRadius: 'var(--btn-radius)',
-            }}
-          >
-            Weiter zu WOOP!E Werte-Training →
-          </button>
-        )}
+        <button
+          onClick={() => {
+            try { localStorage.setItem(DEMO_KEY, 'true') } catch { /* ignore */ }
+            router.push('/training')
+          }}
+          className="w-full py-3 font-semibold text-base rounded-xl transition-all active:scale-95"
+          style={{
+            background: 'var(--bg-card)',
+            color: 'var(--text)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--btn-radius)',
+          }}
+        >
+          Abschließen und Werte-Training starten
+        </button>
 
         <button
           onClick={handleReset}

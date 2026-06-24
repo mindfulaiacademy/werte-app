@@ -38,7 +38,7 @@ export default function Home() {
                 </span>
               </div>
               <h2 className="text-lg font-black mb-1" style={{ color: 'var(--text)' }}>
-                Selbst-Assessment
+                Wie fit bin ich (Selbsteinschätzung)
               </h2>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 Entdecke, welche Werte am stärksten in dir stecken.
