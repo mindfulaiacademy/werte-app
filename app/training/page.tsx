@@ -2,15 +2,28 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { TRAINING_TOPICS, TRAINING_VALUE, getLevelForScore } from '@/data/training'
+import { TRAINING_VALUES, getLevelForScore } from '@/data/training'
 import { getTrainingState, startTraining } from '@/lib/training'
 import { syncToSupabase } from '@/lib/sync'
 
-type Step = 'topic' | 'self' | 'target' | 'confirm'
+type Step = 'value' | 'topic' | 'self' | 'target' | 'confirm'
+
+const DIMENSION_LABELS: Record<string, string> = {
+  IDENTITY: 'Identität',
+  COMMUNITY: 'Gemeinschaft',
+  SOCIALITY: 'Gesellschaft',
+}
+
+const DIMENSION_COLORS: Record<string, string> = {
+  IDENTITY: '#FFD21F',
+  COMMUNITY: '#ef4444',
+  SOCIALITY: '#14b8a6',
+}
 
 export default function TrainingSetupPage() {
   const router = useRouter()
-  const [step, setStep] = useState<Step>('topic')
+  const [step, setStep] = useState<Step>('value')
+  const [selectedValueKey, setSelectedValueKey] = useState<string | null>(null)
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null)
   const [selfScore, setSelfScore] = useState(5)
   const [targetScore, setTargetScore] = useState(7)
@@ -22,7 +35,9 @@ export default function TrainingSetupPage() {
     }
   }, [router])
 
-  const selectedTopic = TRAINING_TOPICS.find((t) => t.id === selectedTopicId)
+  const selectedValue = TRAINING_VALUES.find((v) => v.key === selectedValueKey)
+  const selectedTopic = selectedValue?.topics.find((t) => t.id === selectedTopicId)
+  const dimensions = ['IDENTITY', 'COMMUNITY', 'SOCIALITY'] as const
   const selfLevel = selectedTopic?.levels[getLevelForScore(selfScore)]
   const targetLevel = selectedTopic?.levels[getLevelForScore(targetScore)]
 
@@ -37,26 +52,65 @@ export default function TrainingSetupPage() {
     <div className="flex flex-col min-h-screen px-5 pt-12 pb-10" style={{ background: 'var(--bg)' }}>
       {/* Back */}
       <button
-        onClick={() => (step === 'topic' ? router.push('/') : setStep(step === 'self' ? 'topic' : step === 'target' ? 'self' : 'target'))}
+        onClick={() =>
+          step === 'value'
+            ? router.push('/')
+            : setStep(step === 'topic' ? 'value' : step === 'self' ? 'topic' : step === 'target' ? 'self' : 'target')
+        }
         className="text-sm font-semibold mb-8 text-left"
         style={{ color: 'var(--text-muted)' }}
       >
         ← Zurück
       </button>
 
-      {/* Step: Topic selection */}
-      {step === 'topic' && (
+      {/* Step: Value selection */}
+      {step === 'value' && (
         <div className="flex flex-col gap-6 flex-1">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-              {TRAINING_VALUE.emoji} {TRAINING_VALUE.name}
+              Modul 2
+            </p>
+            <h1 className="text-2xl font-black" style={{ color: 'var(--text)' }}>
+              Welchen Wert willst du trainieren?
+            </h1>
+          </div>
+          {dimensions.map((dim) => (
+            <div key={dim} className="flex flex-col gap-3">
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: DIMENSION_COLORS[dim] }}>
+                {DIMENSION_LABELS[dim]}
+              </p>
+              {TRAINING_VALUES.filter((v) => v.dimension === dim).map((value) => (
+                <button
+                  key={value.key}
+                  onClick={() => {
+                    setSelectedValueKey(value.key)
+                    setStep('topic')
+                  }}
+                  className="w-full text-left rounded-xl p-4 transition-all active:scale-95 flex items-center gap-3"
+                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+                >
+                  <span className="text-2xl">{value.emoji}</span>
+                  <p className="font-bold text-sm" style={{ color: 'var(--text)' }}>{value.name}</p>
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Step: Topic selection */}
+      {step === 'topic' && selectedValue && (
+        <div className="flex flex-col gap-6 flex-1">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
+              {selectedValue.emoji} {selectedValue.name}
             </p>
             <h1 className="text-2xl font-black" style={{ color: 'var(--text)' }}>
               Was willst du trainieren?
             </h1>
           </div>
           <div className="flex flex-col gap-3">
-            {TRAINING_TOPICS.map((topic) => (
+            {selectedValue.topics.map((topic) => (
               <button
                 key={topic.id}
                 onClick={() => {

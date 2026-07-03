@@ -1,3 +1,5 @@
+import { VALUES, type Dimension } from './questions'
+
 export interface TrainingLevel {
   label: string
   emoji: string
@@ -14,16 +16,54 @@ export interface TrainingTopic {
   levels: [TrainingLevel, TrainingLevel, TrainingLevel, TrainingLevel]
 }
 
-export const TRAINING_VALUE = {
-  name: 'Offenheit & Kreativität',
-  dimension: 'IDENTITY',
-  emoji: '🌱',
+export interface TrainingValueGroup {
+  key: string
+  name: string
+  emoji: string
+  dimension: Dimension
+  topics: TrainingTopic[]
 }
 
 export const TRAINING_DURATION = 7
 export const POINTS_PER_DAY = 10
 
-export const TRAINING_TOPICS: TrainingTopic[] = [
+const LEVEL_META = [
+  { label: 'Schlafmodus', emoji: '😴', scoreRange: [0, 2] as [number, number] },
+  { label: 'Augen auf', emoji: '👀', scoreRange: [3, 5] as [number, number] },
+  { label: 'Profi-Training', emoji: '💪', scoreRange: [6, 8] as [number, number] },
+  { label: 'Champion', emoji: '🏆', scoreRange: [9, 10] as [number, number] },
+]
+
+const PLACEHOLDER_INTROS = [
+  'Mach heute einen ersten kleinen Schritt in diese Richtung.',
+  'Trau dich, es heute bewusst zu tun — auch wenn es dich einen Moment zögern lässt.',
+  'Geh heute einen Schritt weiter, der dich wirklich etwas kostet — Zeit, Mut oder Energie.',
+  'Mach daraus heute etwas, das über dich hinausgeht — und andere mitzieht.',
+]
+
+// Placeholder content for values without a finished training catalog yet.
+// Replace with real challenges + neuro-facts, same style as "Offenheit & Kreativität".
+function placeholderLevels(valueName: string, topicTitle: string): [TrainingLevel, TrainingLevel, TrainingLevel, TrainingLevel] {
+  return LEVEL_META.map((meta, i) => ({
+    label: meta.label,
+    emoji: meta.emoji,
+    scoreRange: meta.scoreRange,
+    challenge: `${PLACEHOLDER_INTROS[i]} Thema: „${topicTitle}“ (${valueName}). 🚧 Platzhalter — wird durch echten Trainingsinhalt ersetzt.`,
+    neuroFakt: `🚧 Platzhalter: Hier folgt bald ein Neuro-Fakt, der erklärt, warum „${topicTitle}“ ${valueName} stärkt.`,
+  })) as [TrainingLevel, TrainingLevel, TrainingLevel, TrainingLevel]
+}
+
+function placeholderTopic(valueKey: string, valueName: string, slug: string, emoji: string, title: string, subtitle: string): TrainingTopic {
+  return {
+    id: `${valueKey}__${slug}`,
+    emoji,
+    title,
+    subtitle,
+    levels: placeholderLevels(valueName, title),
+  }
+}
+
+const OFFENHEIT_KREATIVITAET_TOPICS: TrainingTopic[] = [
   {
     id: 'neues-ausprobieren',
     emoji: '🆕',
@@ -289,6 +329,134 @@ export const TRAINING_TOPICS: TrainingTopic[] = [
     ],
   },
 ]
+
+// title + subtitle + emoji per topic for the 11 values that don't have a
+// finished catalog yet. Levels are auto-filled with placeholder content.
+const PLACEHOLDER_TOPIC_SPECS: Record<string, { slug: string; emoji: string; title: string; subtitle: string }[]> = {
+  respekt_disziplin: [
+    { slug: 'regeln-einhalten', emoji: '📏', title: 'Regeln einhalten', subtitle: 'Ich halte mich an Vereinbarungen, auch wenn keiner zuschaut.' },
+    { slug: 'verlaesslich-sein', emoji: '⏰', title: 'Verlässlich sein', subtitle: 'Ich bin pünktlich und halte, was ich zusage.' },
+    { slug: 'grenzen-respektieren', emoji: '🚧', title: 'Grenzen respektieren', subtitle: 'Ich achte die Grenzen anderer, auch ungefragt.' },
+    { slug: 'diszipliniert-bleiben', emoji: '🧱', title: 'Diszipliniert bleiben', subtitle: 'Ich bleibe dran, auch wenn es unbequem wird.' },
+    { slug: 'respektvoll-kommunizieren', emoji: '💬', title: 'Respektvoll kommunizieren', subtitle: 'Ich sage meine Meinung, ohne andere abzuwerten.' },
+    { slug: 'verantwortung-uebernehmen', emoji: '🧾', title: 'Verantwortung übernehmen', subtitle: 'Ich stehe zu dem, was ich tue.' },
+  ],
+  toleranz_geduld: [
+    { slug: 'geduldig-bleiben', emoji: '⏳', title: 'Geduldig bleiben', subtitle: 'Ich halte Unsicherheit und Wartezeit aus.' },
+    { slug: 'andere-meinungen-aushalten', emoji: '🗯️', title: 'Andere Meinungen aushalten', subtitle: 'Ich halte Widerspruch aus, ohne sofort zu kontern.' },
+    { slug: 'nicht-sofort-urteilen', emoji: '⚖️', title: 'Nicht sofort urteilen', subtitle: 'Ich warte mit meinem Urteil, bis ich mehr weiß.' },
+    { slug: 'ruhig-bleiben', emoji: '🌊', title: 'Ruhig bleiben', subtitle: 'Ich bleibe gelassen, auch wenn es stressig wird.' },
+    { slug: 'anders-sein-lassen', emoji: '🌈', title: 'Anders sein lassen', subtitle: 'Ich lasse andere so sein, wie sie sind.' },
+    { slug: 'warten-koennen', emoji: '🕰️', title: 'Warten können', subtitle: 'Ich ertrage es, wenn Dinge nicht sofort passieren.' },
+  ],
+  begeisterung_fleiss: [
+    { slug: 'dranbleiben', emoji: '🔁', title: 'Dranbleiben', subtitle: 'Ich mache weiter, auch wenn die erste Motivation weg ist.' },
+    { slug: 'mit-energie-starten', emoji: '⚡', title: 'Mit Energie starten', subtitle: 'Ich gehe Dinge mit vollem Einsatz an.' },
+    { slug: 'extra-meile-gehen', emoji: '🏃', title: 'Extra Meile gehen', subtitle: 'Ich tue mehr, als unbedingt nötig wäre.' },
+    { slug: 'begeisterung-zeigen', emoji: '🎉', title: 'Begeisterung zeigen', subtitle: 'Ich zeige offen, wenn mich etwas begeistert.' },
+    { slug: 'fleissig-sein', emoji: '🛠️', title: 'Fleißig sein', subtitle: 'Ich arbeite konzentriert und ohne Ausreden.' },
+    { slug: 'durchhalten', emoji: '🏋️', title: 'Durchhalten', subtitle: 'Ich bleibe dran, wenn es schwierig wird.' },
+  ],
+  fokus_aufmerksamkeit: [
+    { slug: 'ablenkungen-ausschalten', emoji: '📵', title: 'Ablenkungen ausschalten', subtitle: 'Ich schaffe mir bewusst störungsfreie Zeit.' },
+    { slug: 'eine-sache-zu-ende-bringen', emoji: '✅', title: 'Eine Sache zu Ende bringen', subtitle: 'Ich beende, was ich anfange, bevor ich Neues starte.' },
+    { slug: 'praesent-sein', emoji: '🧘', title: 'Präsent sein', subtitle: 'Ich bin ganz da, wo ich gerade bin.' },
+    { slug: 'konzentriert-arbeiten', emoji: '🎯', title: 'Konzentriert arbeiten', subtitle: 'Ich arbeite fokussiert an einer Sache.' },
+    { slug: 'aufmerksam-zuhoeren', emoji: '👂', title: 'Aufmerksam zuhören', subtitle: 'Ich schenke anderen meine volle Aufmerksamkeit.' },
+    { slug: 'fokus-zurueckholen', emoji: '🔄', title: 'Fokus zurückholen', subtitle: 'Ich merke Ablenkung und finde zurück zur Sache.' },
+  ],
+  verstehen_erkenntnis: [
+    { slug: 'fragen-stellen', emoji: '❓', title: 'Fragen stellen', subtitle: 'Ich frage nach, statt anzunehmen.' },
+    { slug: 'neues-verstehen-wollen', emoji: '🔍', title: 'Neues verstehen wollen', subtitle: 'Ich will wirklich verstehen, nicht nur wissen.' },
+    { slug: 'nachdenken-statt-reagieren', emoji: '🤔', title: 'Nachdenken statt reagieren', subtitle: 'Ich denke nach, bevor ich reagiere.' },
+    { slug: 'zusammenhaenge-erkennen', emoji: '🧩', title: 'Zusammenhänge erkennen', subtitle: 'Ich suche das große Bild hinter den Details.' },
+    { slug: 'wissen-anwenden', emoji: '🛠️', title: 'Wissen anwenden', subtitle: 'Ich nutze, was ich gelernt habe, aktiv.' },
+    { slug: 'aus-fehlern-lernen', emoji: '📘', title: 'Aus Fehlern lernen', subtitle: 'Ich ziehe aus Fehlern eine echte Lehre.' },
+  ],
+  wertschaetzung_dankbarkeit: [
+    { slug: 'danke-sagen', emoji: '🙏', title: 'Danke sagen', subtitle: 'Ich bedanke mich bewusst und konkret.' },
+    { slug: 'wertschaetzung-zeigen', emoji: '💛', title: 'Wertschätzung zeigen', subtitle: 'Ich zeige, was mir an jemandem wichtig ist.' },
+    { slug: 'kleines-wuerdigen', emoji: '✨', title: 'Kleines würdigen', subtitle: 'Ich nehme kleine gute Dinge bewusst wahr.' },
+    { slug: 'komplimente-machen', emoji: '💬', title: 'Komplimente machen', subtitle: 'Ich mache ehrliche, konkrete Komplimente.' },
+    { slug: 'dankbarkeit-spueren', emoji: '🌤️', title: 'Dankbarkeit spüren', subtitle: 'Ich halte kurz inne, um Dankbarkeit zu fühlen.' },
+    { slug: 'anerkennung-geben', emoji: '🏅', title: 'Anderen Anerkennung geben', subtitle: 'Ich erkenne die Leistung anderer öffentlich an.' },
+  ],
+  anteilnahme_solidaritaet: [
+    { slug: 'fuer-andere-da-sein', emoji: '🤗', title: 'Für andere da sein', subtitle: 'Ich bin präsent, wenn es jemandem nicht gut geht.' },
+    { slug: 'mitfuehlen', emoji: '💞', title: 'Mitfühlen', subtitle: 'Ich versuche nachzuempfinden, wie es anderen geht.' },
+    { slug: 'solidarisch-handeln', emoji: '✊', title: 'Solidarisch handeln', subtitle: 'Ich stelle mich hinter Menschen, die es schwer haben.' },
+    { slug: 'position-beziehen', emoji: '🗣️', title: 'Position beziehen', subtitle: 'Ich beziehe Stellung, wenn Unrecht passiert.' },
+    { slug: 'anteil-nehmen', emoji: '❤️', title: 'Anteil nehmen', subtitle: 'Ich frage aktiv nach, wie es jemandem geht.' },
+    { slug: 'gemeinsam-stark-sein', emoji: '🤜🤛', title: 'Gemeinsam stark sein', subtitle: 'Ich unterstütze das Wir statt nur das Ich.' },
+  ],
+  freundschaft_hilfsbereitschaft: [
+    { slug: 'freundschaft-pflegen', emoji: '🌻', title: 'Freundschaft pflegen', subtitle: 'Ich investiere aktiv Zeit in meine Freundschaften.' },
+    { slug: 'hilfe-anbieten', emoji: '🙋', title: 'Hilfe anbieten', subtitle: 'Ich biete Hilfe an, bevor ich gefragt werde.' },
+    { slug: 'fuer-jemanden-da-sein', emoji: '🫱', title: 'Für jemanden da sein', subtitle: 'Ich bin verlässlich erreichbar, wenn es zählt.' },
+    { slug: 'verlaesslicher-freund-sein', emoji: '🔑', title: 'Verlässlicher Freund sein', subtitle: 'Ich halte, was ich Freunden verspreche.' },
+    { slug: 'kontakt-halten', emoji: '📱', title: 'Kontakt halten', subtitle: 'Ich melde mich aktiv, auch ohne Anlass.' },
+    { slug: 'ungefragt-helfen', emoji: '🎁', title: 'Ungefragt helfen', subtitle: 'Ich helfe, ohne dass ich darum gebeten werde.' },
+  ],
+  fuersorge_unterstuetzung: [
+    { slug: 'fuersorge-zeigen', emoji: '🫶', title: 'Fürsorge zeigen', subtitle: 'Ich kümmere mich aktiv um das Wohl anderer.' },
+    { slug: 'unterstuetzung-anbieten', emoji: '🤲', title: 'Unterstützung anbieten', subtitle: 'Ich biete konkrete Unterstützung an.' },
+    { slug: 'auf-andere-achten', emoji: '👀', title: 'Auf andere achten', subtitle: 'Ich merke, wenn es jemandem nicht gut geht.' },
+    { slug: 'zuhoeren-und-da-sein', emoji: '👂', title: 'Zuhören und da sein', subtitle: 'Ich höre zu, ohne gleich zu lösen.' },
+    { slug: 'jemanden-staerken', emoji: '💪', title: 'Jemanden stärken', subtitle: 'Ich baue jemanden aktiv auf.' },
+    { slug: 'fuer-andere-sorgen', emoji: '🏡', title: 'Für andere sorgen', subtitle: 'Ich übernehme Sorge-Aufgaben, ohne gefragt zu werden.' },
+  ],
+  vertrauen_verantwortung: [
+    { slug: 'vertrauen-aufbauen', emoji: '🧱', title: 'Vertrauen aufbauen', subtitle: 'Ich handle so, dass andere mir vertrauen können.' },
+    { slug: 'verantwortung-uebernehmen', emoji: '🧾', title: 'Verantwortung übernehmen', subtitle: 'Ich übernehme Verantwortung, auch wenn es unbequem ist.' },
+    { slug: 'verlaesslich-sein', emoji: '⏰', title: 'Verlässlich sein', subtitle: 'Ich tue, was ich sage.' },
+    { slug: 'zu-fehlern-stehen', emoji: '🪞', title: 'Zu Fehlern stehen', subtitle: 'Ich gebe eigene Fehler offen zu.' },
+    { slug: 'vertrauen-schenken', emoji: '🔓', title: 'Vertrauen schenken', subtitle: 'Ich gebe anderen einen Vertrauensvorschuss.' },
+    { slug: 'verantwortung-fuer-andere', emoji: '🛟', title: 'Verantwortung für andere übernehmen', subtitle: 'Ich übernehme Verantwortung, die über mich hinausgeht.' },
+  ],
+  mut_rechenschaft: [
+    { slug: 'mutig-sein', emoji: '🦁', title: 'Mutig sein', subtitle: 'Ich tue heute etwas, das mich Überwindung kostet.' },
+    { slug: 'fuer-fehler-geradestehen', emoji: '🙋‍♂️', title: 'Für Fehler geradestehen', subtitle: 'Ich stehe zu Fehlern, statt sie zu vertuschen.' },
+    { slug: 'unbequemes-ansprechen', emoji: '🗣️', title: 'Unbequemes ansprechen', subtitle: 'Ich spreche aus, was unangenehm, aber wichtig ist.' },
+    { slug: 'position-beziehen', emoji: '🚩', title: 'Position beziehen', subtitle: 'Ich beziehe klar Stellung, auch gegen den Strom.' },
+    { slug: 'rechenschaft-ablegen', emoji: '📋', title: 'Rechenschaft ablegen', subtitle: 'Ich erkläre offen, warum ich etwas getan habe.' },
+    { slug: 'risiken-eingehen', emoji: '🎲', title: 'Risiken eingehen', subtitle: 'Ich gehe kalkulierte Risiken bewusst ein.' },
+  ],
+}
+
+const VALUE_EMOJIS: Record<string, string> = {
+  offenheit_kreativitaet: '🌱',
+  respekt_disziplin: '🎯',
+  toleranz_geduld: '⏳',
+  begeisterung_fleiss: '🔥',
+  fokus_aufmerksamkeit: '🧠',
+  verstehen_erkenntnis: '💡',
+  wertschaetzung_dankbarkeit: '🙏',
+  anteilnahme_solidaritaet: '🤝',
+  freundschaft_hilfsbereitschaft: '🧑‍🤝‍🧑',
+  fuersorge_unterstuetzung: '🫂',
+  vertrauen_verantwortung: '🛡️',
+  mut_rechenschaft: '🦁',
+}
+
+export const TRAINING_VALUES: TrainingValueGroup[] = VALUES.map((v) => {
+  const topics =
+    v.key === 'offenheit_kreativitaet'
+      ? OFFENHEIT_KREATIVITAET_TOPICS
+      : (PLACEHOLDER_TOPIC_SPECS[v.key] ?? []).map((spec) =>
+          placeholderTopic(v.key, v.name, spec.slug, spec.emoji, spec.title, spec.subtitle)
+        )
+
+  return {
+    key: v.key,
+    name: v.name,
+    emoji: VALUE_EMOJIS[v.key] ?? '⭐',
+    dimension: v.dimension,
+    topics,
+  }
+})
+
+// Flat lookup across all values — topic ids are unique across the whole catalog.
+export const TRAINING_TOPICS: TrainingTopic[] = TRAINING_VALUES.flatMap((v) => v.topics)
 
 export function getLevelForScore(score: number): 0 | 1 | 2 | 3 {
   if (score <= 2) return 0
