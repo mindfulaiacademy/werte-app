@@ -13,7 +13,7 @@ export default function Home() {
       <div className="flex-1 flex flex-col justify-center gap-6">
         <div className="mb-2">
           <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-            Tempelhof Trainingsapp
+            Wertetraining
           </p>
           <h1 className="text-3xl font-black leading-tight" style={{ color: 'var(--text)' }}>
             Was willst du heute tun?
