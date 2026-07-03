@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { TRAINING_VALUES, getLevelForScore } from '@/data/training'
 import { getTrainingState, startTraining } from '@/lib/training'
 import { syncToSupabase } from '@/lib/sync'
+import { getAnswers, computeScores } from '@/lib/survey'
 
 type Step = 'value' | 'topic' | 'self' | 'target' | 'confirm'
 
@@ -26,6 +27,7 @@ export default function TrainingSetupPage() {
   const [selectedValueKey, setSelectedValueKey] = useState<string | null>(null)
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null)
   const [selfScore, setSelfScore] = useState(5)
+  const [selfScoreFromSurvey, setSelfScoreFromSurvey] = useState(false)
   const [targetScore, setTargetScore] = useState(7)
 
   useEffect(() => {
@@ -34,6 +36,20 @@ export default function TrainingSetupPage() {
       router.replace('/training/aktiv')
     }
   }, [router])
+
+  useEffect(() => {
+    if (!selectedValueKey) return
+    const scores = computeScores(getAnswers())
+    const result = scores.find((s) => s.valueKey === selectedValueKey)
+    if (result && result.answeredCount > 0) {
+      const surveyScore = Math.min(10, Math.round(result.score * 2))
+      setSelfScore(surveyScore)
+      setSelfScoreFromSurvey(true)
+      setTargetScore((t) => Math.max(t, surveyScore))
+    } else {
+      setSelfScoreFromSurvey(false)
+    }
+  }, [selectedValueKey])
 
   const selectedValue = TRAINING_VALUES.find((v) => v.key === selectedValueKey)
   const selectedTopic = selectedValue?.topics.find((t) => t.id === selectedTopicId)
@@ -106,7 +122,7 @@ export default function TrainingSetupPage() {
               {selectedValue.emoji} {selectedValue.name}
             </p>
             <h1 className="text-2xl font-black" style={{ color: 'var(--text)' }}>
-              Was willst du trainieren?
+              Wie willst du trainieren?
             </h1>
           </div>
           <div className="flex flex-col gap-3">
@@ -132,34 +148,66 @@ export default function TrainingSetupPage() {
       )}
 
       {/* Step: Self-assessment */}
-      {step === 'self' && selectedTopic && (
+      {step === 'self' && selectedTopic && selectedValue && (
         <div className="flex flex-col gap-6 flex-1">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-              {selectedTopic.emoji} {selectedTopic.title}
-            </p>
-            <h1 className="text-2xl font-black mb-1" style={{ color: 'var(--text)' }}>
-              Wo stehst du gerade?
-            </h1>
-            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              Sei ehrlich — kein Richtig oder Falsch.
-            </p>
-          </div>
+          {selfScoreFromSurvey ? (
+            <>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
+                  {selectedTopic.emoji} {selectedTopic.title}
+                </p>
+                <h1 className="text-2xl font-black mb-1" style={{ color: 'var(--text)' }}>
+                  Hier stehst du gerade beim Wert „{selectedValue.name}“
+                </h1>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Basierend auf deiner Selbsteinschätzung.
+                </p>
+              </div>
 
-          <ScoreSelector value={selfScore} onChange={setSelfScore} />
+              {selfLevel && (
+                <div
+                  className="rounded-xl p-4"
+                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+                >
+                  <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
+                    Dein Level
+                  </p>
+                  <p className="font-black text-lg" style={{ color: 'var(--text)' }}>
+                    {selfLevel.emoji} {selfLevel.label} ({selfScore}/10)
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
+                  {selectedTopic.emoji} {selectedTopic.title}
+                </p>
+                <h1 className="text-2xl font-black mb-1" style={{ color: 'var(--text)' }}>
+                  Wo stehst du gerade?
+                </h1>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  Sei ehrlich — kein Richtig oder Falsch.
+                </p>
+              </div>
 
-          {selfLevel && (
-            <div
-              className="rounded-xl p-4"
-              style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-            >
-              <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
-                Dein Level
-              </p>
-              <p className="font-black text-lg" style={{ color: 'var(--text)' }}>
-                {selfLevel.emoji} {selfLevel.label}
-              </p>
-            </div>
+              <ScoreSelector value={selfScore} onChange={setSelfScore} />
+
+              {selfLevel && (
+                <div
+                  className="rounded-xl p-4"
+                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+                >
+                  <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
+                    Dein Level
+                  </p>
+                  <p className="font-black text-lg" style={{ color: 'var(--text)' }}>
+                    {selfLevel.emoji} {selfLevel.label}
+                  </p>
+                </div>
+              )}
+            </>
           )}
 
           <div className="mt-auto">
@@ -182,7 +230,7 @@ export default function TrainingSetupPage() {
               {selectedTopic.emoji} {selectedTopic.title}
             </p>
             <h1 className="text-2xl font-black mb-1" style={{ color: 'var(--text)' }}>
-              Wo willst du in 7 Tagen sein?
+              Wo willst du hin?
             </h1>
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
               Dein Ziel für diese Trainingswoche.
