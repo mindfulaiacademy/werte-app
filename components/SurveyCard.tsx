@@ -8,13 +8,14 @@ interface Props {
   current: number
   total: number
   onAnswer: (value: number) => void
+  promptText?: string
 }
 
 const EMOJIS = ['😐', '🙂', '😊', '😄', '😍']
 const LABEL_LEFT = 'gar nicht wichtig'
 const LABEL_RIGHT = 'mega wichtig'
 
-export default function SurveyCard({ question, current, total, onAnswer }: Props) {
+export default function SurveyCard({ question, current, total, onAnswer, promptText = 'Was ist dir wichtig?' }: Props) {
   const [selected, setSelected] = useState<number | null>(null)
   const progress = ((current - 1) / total) * 100
 
@@ -55,7 +56,7 @@ export default function SurveyCard({ question, current, total, onAnswer }: Props
 
           {/* Prompt */}
           <p className="text-xs font-semibold uppercase tracking-widest text-center" style={{ color: 'var(--text-muted)' }}>
-            Was ist dir wichtig?
+            {promptText}
           </p>
 
           {/* Question text */}

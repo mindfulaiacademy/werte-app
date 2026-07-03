@@ -12,6 +12,8 @@ import type { ScoreResult } from '@/lib/survey'
 
 interface Props {
   scores: ScoreResult[]
+  compareScores?: ScoreResult[]
+  compareLabel?: string
 }
 
 const DIMENSION_COLORS: Record<string, string> = {
@@ -50,12 +52,18 @@ function CustomTick(props: any, scores: ScoreResult[]) {
   )
 }
 
-export default function WerteRadarChart({ scores }: Props) {
-  const data = scores.map((s) => ({
-    subject: s.valueName,
-    value: s.score,
-    fullMark: 5,
-  }))
+export default function WerteRadarChart({ scores, compareScores, compareLabel = 'Fremdeinschätzung' }: Props) {
+  const compareByKey = new Map((compareScores ?? []).map((s) => [s.valueKey, s]))
+
+  const data = scores.map((s) => {
+    const compare = compareByKey.get(s.valueKey)
+    return {
+      subject: s.valueName,
+      value: s.score,
+      compareValue: compare && compare.answeredCount > 0 ? compare.score : undefined,
+      fullMark: 5,
+    }
+  })
 
   return (
     <ResponsiveContainer width="100%" height={360}>
@@ -67,15 +75,25 @@ export default function WerteRadarChart({ scores }: Props) {
           tick={(props: any) => CustomTick(props, scores)}
         />
         <Radar
-          name="Werte"
+          name="Du"
           dataKey="value"
           stroke="#FFD21F"
           fill="#FFD21F"
           fillOpacity={0.35}
           dot={{ r: 4, fill: '#e6bc00', strokeWidth: 0 }}
         />
+        {compareScores && (
+          <Radar
+            name={compareLabel}
+            dataKey="compareValue"
+            stroke="#6366f1"
+            fill="#6366f1"
+            fillOpacity={0.2}
+            dot={{ r: 4, fill: '#4f46e5', strokeWidth: 0 }}
+          />
+        )}
         <Tooltip
-          formatter={(value) => [typeof value === 'number' ? `${value.toFixed(1)} / 5` : value, 'Score']}
+          formatter={(value, name) => [typeof value === 'number' ? `${value.toFixed(1)} / 5` : value, name]}
           contentStyle={{
             background: '#ffffff',
             border: '1px solid #e5e7eb',

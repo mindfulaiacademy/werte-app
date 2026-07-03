@@ -13,6 +13,7 @@ import {
   type ScoreResult,
 } from '@/lib/survey'
 import { getOrCreateSessionId } from '@/lib/sync'
+import { fetchPeerAggregate, type PeerAggregate } from '@/lib/peerSurvey'
 
 const DEMO_KEY = 'wt_demo'
 
@@ -32,7 +33,7 @@ const DIMENSION_COLORS: Record<string, string> = {
 
 const ROUND_CONFIG = {
   1: {
-    label: 'Erste Einschätzung',
+    label: 'Erste Selbsteinschätzung',
     sublabel: 'Basiert auf 20 von 60 Fragen.',
     nextLabel: 'Runde 2 starten',
     nextRound: true,
@@ -82,6 +83,8 @@ export default function ErgebnisPage() {
   const router = useRouter()
   const [scores, setScores] = useState<ScoreResult[]>([])
   const [round, setRound] = useState<1 | 2 | 3>(1)
+  const [peerAggregate, setPeerAggregate] = useState<PeerAggregate>({ scores: [], peerCount: 0 })
+  const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle')
 
   useEffect(() => {
     const answers = getAnswers()
@@ -91,7 +94,32 @@ export default function ErgebnisPage() {
     }
     setScores(computeScores(answers))
     setRound(getRound(answers))
+
+    const sessionId = getOrCreateSessionId()
+    fetchPeerAggregate(sessionId).then(setPeerAggregate)
   }, [router])
+
+  async function handleGetPeerFeedback() {
+    const sessionId = getOrCreateSessionId()
+    const link = `${window.location.origin}/peer/${sessionId}`
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Fremdeinschätzung', text: 'Schätze mich in wenigen Minuten anonym ein:', url: link })
+        return
+      } catch {
+        // user cancelled or share failed — fall back to clipboard
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(link)
+      setShareStatus('copied')
+      setTimeout(() => setShareStatus('idle'), 2000)
+    } catch {
+      // ignore
+    }
+  }
 
   function handleReset() {
     resetSurvey()
@@ -141,7 +169,11 @@ export default function ErgebnisPage() {
           Ergebnis Heatmap
         </p>
 
-        <WerteRadarChart scores={scores} />
+        <WerteRadarChart
+          scores={scores}
+          compareScores={peerAggregate.peerCount > 0 ? peerAggregate.scores : undefined}
+          compareLabel={`Fremdeinschätzung (Ø von ${peerAggregate.peerCount})`}
+        />
 
         {/* Legend */}
         <div className="flex justify-center gap-4 pb-4 flex-wrap">
@@ -153,6 +185,14 @@ export default function ErgebnisPage() {
               </span>
             </div>
           ))}
+          {peerAggregate.peerCount > 0 && (
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-full" style={{ background: '#6366f1' }} />
+              <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                Fremdeinschätzung (Ø von {peerAggregate.peerCount})
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -202,6 +242,19 @@ export default function ErgebnisPage() {
           }}
         >
           Abschließen und Werte-Training starten
+        </button>
+
+        <button
+          onClick={handleGetPeerFeedback}
+          className="w-full py-3 font-semibold text-base rounded-xl transition-all active:scale-95"
+          style={{
+            background: 'var(--bg-card)',
+            color: 'var(--text)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--btn-radius)',
+          }}
+        >
+          {shareStatus === 'copied' ? 'Link kopiert ✓' : 'Fremdeinschätzung bekommen'}
         </button>
 
         <button
