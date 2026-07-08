@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { TRAINING_TOPICS, TRAINING_DURATION, getLevelForScore } from '@/data/training'
+import { TRAINING_TOPICS, getLevelForScore } from '@/data/training'
 import {
   getTrainingState,
   resetTraining,
@@ -30,11 +30,13 @@ export default function TrainingAbschlussPage() {
   const topic = TRAINING_TOPICS.find((t) => t.id === state.topicId)
   if (!topic) return null
 
+  const durationDays = state.durationDays
   const totalPoints = getTotalPoints(state)
-  const maxPoints = getMaxPoints()
+  const maxPoints = getMaxPoints(durationDays)
   const doneCount = state.checkins.filter((c) => c === true).length
   const targetLevel = topic.levels[getLevelForScore(state.targetScore)]
   const pct = Math.round((totalPoints / maxPoints) * 100)
+  const headline = durationDays === 7 ? 'Woche abgeschlossen!' : durationDays === 21 ? '21-Tage-Runde abgeschlossen!' : 'Training abgeschlossen!'
 
   function handleRestart() {
     resetTraining()
@@ -57,10 +59,10 @@ export default function TrainingAbschlussPage() {
       {/* Headline */}
       <div className="text-center mb-6">
         <h1 className="text-3xl font-black mb-2" style={{ color: 'var(--text)' }}>
-          Woche abgeschlossen!
+          {headline}
         </h1>
         <p className="text-base" style={{ color: 'var(--text-muted)' }}>
-          {topic.emoji} {topic.title} · {TRAINING_DURATION} Tage
+          {topic.emoji} {topic.title} · {durationDays} Tage
         </p>
       </div>
 
@@ -76,7 +78,7 @@ export default function TrainingAbschlussPage() {
           {totalPoints}
         </p>
         <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          von {maxPoints} möglichen · {doneCount} von {TRAINING_DURATION} Tagen erfüllt
+          von {maxPoints} möglichen · {doneCount} von {durationDays} Tagen erfüllt
         </p>
       </div>
 
@@ -86,24 +88,17 @@ export default function TrainingAbschlussPage() {
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
       >
         <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
-          Deine Woche
+          Dein Verlauf
         </p>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-7 gap-1.5">
           {state.checkins.map((checkin, i) => (
             <div
               key={i}
-              className="flex-1 aspect-square rounded-lg"
+              className="aspect-square rounded-md"
               style={{
                 background: checkin === true ? '#16a34a' : checkin === false ? '#374151' : 'var(--border)',
               }}
             />
-          ))}
-        </div>
-        <div className="flex gap-2 mt-2">
-          {Array.from({ length: TRAINING_DURATION }).map((_, i) => (
-            <div key={i} className="flex-1 text-center">
-              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{i + 1}</span>
-            </div>
           ))}
         </div>
       </div>

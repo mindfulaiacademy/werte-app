@@ -24,8 +24,32 @@ export interface TrainingValueGroup {
   topics: TrainingTopic[]
 }
 
-export const TRAINING_DURATION = 7
+export const DEFAULT_TRAINING_DURATION = 7
 export const POINTS_PER_DAY = 10
+
+export interface DurationOption {
+  days: number
+  label: string
+  neuroFakt: string
+}
+
+export const TRAINING_DURATION_OPTIONS: DurationOption[] = [
+  {
+    days: 7,
+    label: '7 Tage',
+    neuroFakt: 'Ein erster Trainingsreiz — genug, um eine neue Reaktion in deinem Gehirn zu spüren.',
+  },
+  {
+    days: 21,
+    label: '21 Tage',
+    neuroFakt: 'Der Punkt, an dem eine Handlung anfängt, sich weniger nach Anstrengung und mehr nach Routine anzufühlen.',
+  },
+  {
+    days: 90,
+    label: '90 Tage',
+    neuroFakt: 'Studien zeigen: Gewohnheiten werden im Schnitt nach 66 Tagen automatisch (Lally et al., 2010) — 90 Tage geben dir echten Spielraum.',
+  },
+]
 
 const LEVEL_META = [
   { label: 'Schlafmodus', emoji: '😴', scoreRange: [0, 2] as [number, number] },

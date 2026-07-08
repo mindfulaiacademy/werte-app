@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { TRAINING_VALUES, getLevelForScore } from '@/data/training'
+import { TRAINING_VALUES, TRAINING_DURATION_OPTIONS, DEFAULT_TRAINING_DURATION, POINTS_PER_DAY, getLevelForScore } from '@/data/training'
 import { getTrainingState, startTraining } from '@/lib/training'
 import { syncToSupabase } from '@/lib/sync'
 import { getAnswers, computeScores } from '@/lib/survey'
 
-type Step = 'value' | 'topic' | 'self' | 'target' | 'confirm'
+type Step = 'value' | 'topic' | 'duration' | 'self' | 'target' | 'confirm'
 
 const DIMENSION_LABELS: Record<string, string> = {
   IDENTITY: 'Identität',
@@ -29,6 +29,7 @@ export default function TrainingSetupPage() {
   const [selfScore, setSelfScore] = useState(5)
   const [selfScoreFromSurvey, setSelfScoreFromSurvey] = useState(false)
   const [targetScore, setTargetScore] = useState(7)
+  const [durationDays, setDurationDays] = useState(DEFAULT_TRAINING_DURATION)
 
   useEffect(() => {
     const state = getTrainingState()
@@ -59,7 +60,7 @@ export default function TrainingSetupPage() {
 
   function handleStart() {
     if (!selectedTopicId) return
-    startTraining(selectedTopicId, selfScore, targetScore)
+    startTraining(selectedTopicId, selfScore, targetScore, durationDays)
     syncToSupabase()
     router.push('/training/aktiv')
   }
@@ -71,7 +72,17 @@ export default function TrainingSetupPage() {
         onClick={() =>
           step === 'value'
             ? router.push('/')
-            : setStep(step === 'topic' ? 'value' : step === 'self' ? 'topic' : step === 'target' ? 'self' : 'target')
+            : setStep(
+                step === 'topic'
+                  ? 'value'
+                  : step === 'duration'
+                  ? 'topic'
+                  : step === 'self'
+                  ? 'duration'
+                  : step === 'target'
+                  ? 'self'
+                  : 'target'
+              )
         }
         className="text-sm font-semibold mb-8 text-left"
         style={{ color: 'var(--text-muted)' }}
@@ -131,7 +142,7 @@ export default function TrainingSetupPage() {
                 key={topic.id}
                 onClick={() => {
                   setSelectedTopicId(topic.id)
-                  setStep('self')
+                  setStep('duration')
                 }}
                 className="w-full text-left rounded-xl p-4 transition-all active:scale-95 flex items-start gap-3"
                 style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
@@ -141,6 +152,36 @@ export default function TrainingSetupPage() {
                   <p className="font-bold text-sm" style={{ color: 'var(--text)' }}>{topic.title}</p>
                   <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{topic.subtitle}</p>
                 </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Step: Duration selection */}
+      {step === 'duration' && selectedTopic && (
+        <div className="flex flex-col gap-6 flex-1">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
+              {selectedTopic.emoji} {selectedTopic.title}
+            </p>
+            <h1 className="text-2xl font-black" style={{ color: 'var(--text)' }}>
+              Wie lange willst du trainieren?
+            </h1>
+          </div>
+          <div className="flex flex-col gap-3">
+            {TRAINING_DURATION_OPTIONS.map((option) => (
+              <button
+                key={option.days}
+                onClick={() => {
+                  setDurationDays(option.days)
+                  setStep('self')
+                }}
+                className="w-full text-left rounded-xl p-4 transition-all active:scale-95"
+                style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+              >
+                <p className="font-black text-lg mb-1" style={{ color: 'var(--text)' }}>{option.label}</p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{option.neuroFakt}</p>
               </button>
             ))}
           </div>
@@ -233,7 +274,7 @@ export default function TrainingSetupPage() {
               Wo willst du hin?
             </h1>
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              Dein Ziel für diese Trainingswoche.
+              Dein Ziel für die nächsten {durationDays} Tage.
             </p>
           </div>
 
@@ -273,7 +314,7 @@ export default function TrainingSetupPage() {
               Dein Trainingsplan
             </h1>
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              7 Tage · täglich 1 Micro-Challenge
+              {durationDays} Tage · täglich 1 Micro-Challenge
             </p>
           </div>
 
@@ -281,8 +322,8 @@ export default function TrainingSetupPage() {
             <SummaryRow label="Thema" value={`${selectedTopic.emoji} ${selectedTopic.title}`} />
             <SummaryRow label="Dein Start" value={`${selfLevel.emoji} ${selfLevel.label} (${selfScore}/10)`} />
             <SummaryRow label="Dein Ziel" value={`${targetLevel.emoji} ${targetLevel.label} (${targetScore}/10)`} />
-            <SummaryRow label="Dauer" value="7 Tage" />
-            <SummaryRow label="Punkte möglich" value="70 Punkte" />
+            <SummaryRow label="Dauer" value={`${durationDays} Tage`} />
+            <SummaryRow label="Punkte möglich" value={`${durationDays * POINTS_PER_DAY} Punkte`} />
           </div>
 
           <div className="mt-auto">

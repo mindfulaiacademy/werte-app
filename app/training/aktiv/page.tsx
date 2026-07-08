@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { TRAINING_TOPICS, TRAINING_DURATION, POINTS_PER_DAY, getLevelForScore } from '@/data/training'
+import { TRAINING_TOPICS, POINTS_PER_DAY, getLevelForScore } from '@/data/training'
 import {
   getTrainingState,
   saveTrainingState,
@@ -40,19 +40,20 @@ export default function TrainingAktivPage() {
   const levelIndex = getLevelForScore(state.selfScore)
   const level = topic.levels[levelIndex]
   const demoMode = isDemoMode()
+  const durationDays = state.durationDays
   const dayIndex = demoMode
-    ? Math.max(0, state.checkins.findIndex((c) => c === null) === -1 ? TRAINING_DURATION - 1 : state.checkins.findIndex((c) => c === null))
-    : getDayIndex(state.startDate)
+    ? Math.max(0, state.checkins.findIndex((c) => c === null) === -1 ? durationDays - 1 : state.checkins.findIndex((c) => c === null))
+    : getDayIndex(state.startDate, durationDays)
   const alreadyDone = demoMode ? state.checkins[dayIndex] !== null : hasCheckedInToday(state)
   const todayResult = state.checkins[dayIndex]
   const totalPoints = getTotalPoints(state)
-  const maxPoints = getMaxPoints()
+  const maxPoints = getMaxPoints(durationDays)
 
   function handleCheckin(done: boolean) {
     if (!state || alreadyDone) return
 
     if (demoMode) {
-      const updated = { ...state, checkins: Array(TRAINING_DURATION).fill(done) }
+      const updated = { ...state, checkins: Array(durationDays).fill(done) }
       saveTrainingState(updated)
       setState(updated)
       setJustCheckedIn(done)
@@ -86,7 +87,7 @@ export default function TrainingAktivPage() {
             Modul 2
           </span>
           <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            Tag {dayIndex + 1} / {TRAINING_DURATION}
+            Tag {dayIndex + 1} / {durationDays}
           </span>
           {demoMode && (
             <span className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ background: '#f97316', color: '#fff' }}>
@@ -116,22 +117,20 @@ export default function TrainingAktivPage() {
               {totalPoints} / {maxPoints} Punkte
             </p>
           </div>
-          <div className="flex gap-2">
-            {Array.from({ length: TRAINING_DURATION }).map((_, i) => {
+          <div className="grid grid-cols-7 gap-1.5">
+            {Array.from({ length: durationDays }).map((_, i) => {
               const checkin = state.checkins[i]
               const isToday = i === dayIndex
               const isFuture = i > dayIndex
               return (
                 <div
                   key={i}
-                  className="flex-1 aspect-square rounded-lg transition-all"
+                  className="aspect-square rounded-md transition-all"
                   style={{
                     background: checkin === true
                       ? '#16a34a'
                       : checkin === false
                       ? '#374151'
-                      : isFuture
-                      ? 'var(--border)'
                       : 'var(--border)',
                     border: isToday && !alreadyDone ? '2px solid #16a34a' : '2px solid transparent',
                     opacity: isFuture ? 0.4 : 1,
@@ -139,15 +138,6 @@ export default function TrainingAktivPage() {
                 />
               )
             })}
-          </div>
-          <div className="flex gap-2 mt-2">
-            {Array.from({ length: TRAINING_DURATION }).map((_, i) => (
-              <div key={i} className="flex-1 text-center">
-                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  {i + 1}
-                </span>
-              </div>
-            ))}
           </div>
         </div>
       </div>
