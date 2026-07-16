@@ -1,9 +1,11 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useLanguage } from '@/lib/i18n'
 
 export default function Home() {
   const router = useRouter()
+  const { lang, t } = useLanguage()
 
   return (
     <div
@@ -13,10 +15,10 @@ export default function Home() {
       <div className="flex-1 flex flex-col justify-center gap-6">
         <div className="mb-2">
           <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-            Wertetraining
+            {t.home.eyebrow[lang]}
           </p>
           <h1 className="text-3xl font-black leading-tight" style={{ color: 'var(--text)' }}>
-            Was willst du heute tun?
+            {t.home.heading[lang]}
           </h1>
         </div>
 
@@ -34,14 +36,14 @@ export default function Home() {
                   className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
                   style={{ background: 'var(--accent)', color: 'var(--accent-text)' }}
                 >
-                  Modul 1
+                  {t.home.module1Badge[lang]}
                 </span>
               </div>
               <h2 className="text-lg font-black mb-1" style={{ color: 'var(--text)' }}>
-                Werte-Fitness Checkin (Selbsteinschätzung)
+                {t.home.module1Title[lang]}
               </h2>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                Entdecke, welche Werte am stärksten in dir stecken.
+                {t.home.module1Desc[lang]}
               </p>
             </div>
             <span className="text-xl" style={{ color: 'var(--text-muted)' }}>→</span>
@@ -62,14 +64,14 @@ export default function Home() {
                   className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
                   style={{ background: 'var(--accent)', color: 'var(--accent-text)' }}
                 >
-                  Modul 2
+                  {t.home.module2Badge[lang]}
                 </span>
               </div>
               <h2 className="text-lg font-black mb-1" style={{ color: 'var(--text)' }}>
-                Trainingsplan
+                {t.home.module2Title[lang]}
               </h2>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                Trainiere einen Wert 7 Tage lang mit täglichen Micro-Challenges.
+                {t.home.module2Desc[lang]}
               </p>
             </div>
             <span className="text-xl" style={{ color: 'var(--text-muted)' }}>→</span>

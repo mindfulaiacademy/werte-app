@@ -15,9 +15,11 @@ import {
   type TrainingState,
 } from '@/lib/training'
 import { syncToSupabase, isDemoMode } from '@/lib/sync'
+import { useLanguage } from '@/lib/i18n'
 
 export default function TrainingAktivPage() {
   const router = useRouter()
+  const { lang, t, tr } = useLanguage()
   const [state, setState] = useState<TrainingState | null>(null)
   const [justCheckedIn, setJustCheckedIn] = useState<boolean | null>(null)
   const [neuroOpen, setNeuroOpen] = useState(false)
@@ -77,29 +79,29 @@ export default function TrainingAktivPage() {
       {/* Header */}
       <div className="px-5 pt-10 pb-4">
         <button onClick={() => router.push('/')} className="text-sm font-semibold mb-6 block" style={{ color: 'var(--text-muted)' }}>
-          ← Home
+          {t.trainingActive.home[lang]}
         </button>
         <div className="flex items-center gap-2 mb-1">
           <span
             className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
             style={{ background: 'var(--accent)', color: 'var(--accent-text)' }}
           >
-            Modul 2
+            {t.trainingActive.module2[lang]}
           </span>
           <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            Tag {dayIndex + 1} / {durationDays}
+            {t.trainingActive.day[lang]} {dayIndex + 1} / {durationDays}
           </span>
           {demoMode && (
             <span className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full" style={{ background: '#f97316', color: '#fff' }}>
-              Demo
+              {t.trainingActive.demo[lang]}
             </span>
           )}
         </div>
         <h1 className="text-2xl font-black" style={{ color: 'var(--text)' }}>
-          {topic.emoji} {topic.title}
+          {topic.emoji} {tr(topic.title)}
         </h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-          {level.emoji} {level.label} · Ziel: {state.targetScore}/10
+          {level.emoji} {tr(level.label)} · {t.trainingActive.target[lang]}: {state.targetScore}/10
         </p>
       </div>
 
@@ -111,10 +113,10 @@ export default function TrainingAktivPage() {
         >
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
-              Dein Fortschritt
+              {t.trainingActive.progress[lang]}
             </p>
             <p className="text-xs font-bold" style={{ color: 'var(--text)' }}>
-              {totalPoints} / {maxPoints} Punkte
+              {totalPoints} / {maxPoints} {t.trainingActive.points[lang]}
             </p>
           </div>
           <div className="grid grid-cols-7 gap-1.5">
@@ -149,10 +151,10 @@ export default function TrainingAktivPage() {
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
         >
           <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
-            Deine heutige Challenge
+            {t.trainingActive.todaysChallenge[lang]}
           </p>
           <p className="text-base leading-relaxed font-medium" style={{ color: 'var(--text)' }}>
-            {level.challenge}
+            {tr(level.challenge)}
           </p>
 
           {/* Neuro-Fakt */}
@@ -163,7 +165,7 @@ export default function TrainingAktivPage() {
               style={{ color: 'var(--text-muted)' }}
             >
               <span>🧠</span>
-              <span>Warum hilft das?</span>
+              <span>{t.trainingActive.whyHelps[lang]}</span>
               <span className="ml-auto text-xs" style={{ transform: neuroOpen ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.2s' }}>
                 ▾
               </span>
@@ -174,7 +176,7 @@ export default function TrainingAktivPage() {
               style={{ maxHeight: neuroOpen ? '400px' : '0px', opacity: neuroOpen ? 1 : 0 }}
             >
               <p className="text-sm leading-relaxed mt-3" style={{ color: 'var(--text-muted)' }}>
-                {level.neuroFakt}
+                {tr(level.neuroFakt)}
               </p>
             </div>
           </div>
@@ -186,14 +188,14 @@ export default function TrainingAktivPage() {
         {!alreadyDone ? (
           <>
             <p className="text-sm text-center font-semibold" style={{ color: 'var(--text-muted)' }}>
-              Hast du die Challenge heute erfüllt?
+              {t.trainingActive.didYouDoIt[lang]}
             </p>
             <button
               onClick={() => handleCheckin(true)}
               className="w-full py-4 font-black text-xl rounded-xl transition-all active:scale-95"
               style={{ background: '#16a34a', color: '#ffffff', borderRadius: 'var(--btn-radius)' }}
             >
-              ✓ Ja, hab ich!
+              {t.trainingActive.yesGotIt[lang]}
             </button>
             <button
               onClick={() => handleCheckin(false)}
@@ -205,7 +207,7 @@ export default function TrainingAktivPage() {
                 borderRadius: 'var(--btn-radius)',
               }}
             >
-              Heute nicht
+              {t.trainingActive.notToday[lang]}
             </button>
           </>
         ) : (
@@ -217,20 +219,20 @@ export default function TrainingAktivPage() {
               <>
                 <p className="text-3xl mb-2">🎉</p>
                 <p className="font-black text-lg" style={{ color: '#16a34a' }}>
-                  +{POINTS_PER_DAY} Punkte!
+                  +{POINTS_PER_DAY} {t.trainingActive.pointsEarned[lang]}
                 </p>
                 <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-                  Morgen geht's weiter.
+                  {t.trainingActive.tomorrowContinues[lang]}
                 </p>
               </>
             ) : (
               <>
                 <p className="text-3xl mb-2">💪</p>
                 <p className="font-black text-lg" style={{ color: 'var(--text)' }}>
-                  Morgen wieder!
+                  {t.trainingActive.tryAgain[lang]}
                 </p>
                 <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-                  Kein Problem — morgen ist ein neuer Tag.
+                  {t.trainingActive.noProblem[lang]}
                 </p>
               </>
             )}

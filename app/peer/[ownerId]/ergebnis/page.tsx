@@ -3,17 +3,13 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { getAnswers, getRound, TOTAL_QUESTIONS } from '@/lib/peerSurvey'
-
-const ROUND_CONFIG = {
-  1: { label: 'Runde 1 geschafft', nextLabel: 'Runde 2 starten', nextRound: true },
-  2: { label: 'Runde 2 geschafft', nextLabel: 'Runde 3 starten', nextRound: true },
-  3: { label: 'Danke!', nextLabel: null, nextRound: false },
-}
+import { useLanguage } from '@/lib/i18n'
 
 export default function PeerErgebnisPage() {
   const router = useRouter()
   const params = useParams<{ ownerId: string }>()
   const ownerId = params.ownerId
+  const { lang, t } = useLanguage()
   const [round, setRound] = useState<1 | 2 | 3>(1)
   const [answeredTotal, setAnsweredTotal] = useState(0)
 
@@ -30,6 +26,11 @@ export default function PeerErgebnisPage() {
 
   if (answeredTotal === 0) return null
 
+  const ROUND_CONFIG = {
+    1: { label: t.peer.round1[lang], nextLabel: t.peer.nextRound2[lang], nextRound: true },
+    2: { label: t.peer.round2[lang], nextLabel: t.peer.nextRound3[lang], nextRound: true },
+    3: { label: t.peer.round3[lang], nextLabel: null as string | null, nextRound: false },
+  }
   const config = ROUND_CONFIG[round]
 
   return (
@@ -40,11 +41,11 @@ export default function PeerErgebnisPage() {
           {config.label}
         </h1>
         <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          {answeredTotal} / {TOTAL_QUESTIONS} Fragen beantwortet.
+          {answeredTotal} / {TOTAL_QUESTIONS} {t.peer.questionsAnswered[lang]}
         </p>
         {!config.nextRound && (
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Deine Einschätzung wurde übermittelt und fließt anonym in das Ergebnis ein.
+            {t.peer.submittedNote[lang]}
           </p>
         )}
       </div>

@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from 'recharts'
 import type { ScoreResult } from '@/lib/survey'
+import { useLanguage } from '@/lib/i18n'
 
 interface Props {
   scores: ScoreResult[]
@@ -52,7 +53,9 @@ function CustomTick(props: any, scores: ScoreResult[]) {
   )
 }
 
-export default function WerteRadarChart({ scores, compareScores, compareLabel = 'Fremdeinschätzung' }: Props) {
+export default function WerteRadarChart({ scores, compareScores, compareLabel }: Props) {
+  const { lang, t } = useLanguage()
+  const resolvedCompareLabel = compareLabel ?? t.ergebnis.peerCompareLabel[lang]
   const compareByKey = new Map((compareScores ?? []).map((s) => [s.valueKey, s]))
 
   const data = scores.map((s) => {
@@ -75,7 +78,7 @@ export default function WerteRadarChart({ scores, compareScores, compareLabel = 
           tick={(props: any) => CustomTick(props, scores)}
         />
         <Radar
-          name="Du"
+          name={lang === 'de' ? 'Du' : 'You'}
           dataKey="value"
           stroke="#FFD21F"
           fill="#FFD21F"
@@ -84,7 +87,7 @@ export default function WerteRadarChart({ scores, compareScores, compareLabel = 
         />
         {compareScores && (
           <Radar
-            name={compareLabel}
+            name={resolvedCompareLabel}
             dataKey="compareValue"
             stroke="#6366f1"
             fill="#6366f1"

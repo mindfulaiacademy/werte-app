@@ -1,6 +1,7 @@
 import { QUESTIONS, type Question } from '@/data/questions'
 import { computeScores, type Answers, type ScoreResult } from './survey'
 import { supabase } from './supabase'
+import type { Lang } from '@/lib/i18n'
 
 export const ROUND_SIZE = 20
 export const TOTAL_QUESTIONS = 60
@@ -136,7 +137,7 @@ export interface PeerAggregate {
 }
 
 // Averages each peer's per-value score, then averages across peers.
-export async function fetchPeerAggregate(ownerId: string): Promise<PeerAggregate> {
+export async function fetchPeerAggregate(ownerId: string, lang: Lang = 'en'): Promise<PeerAggregate> {
   try {
     const { data, error } = await supabase
       .from('peer_assessments')
@@ -146,7 +147,7 @@ export async function fetchPeerAggregate(ownerId: string): Promise<PeerAggregate
     if (error || !data) return { scores: [], peerCount: 0 }
 
     const perPeerScores = data
-      .map((row) => computeScores((row.answers as Answers) || {}))
+      .map((row) => computeScores((row.answers as Answers) || {}, lang))
       .filter((scores) => scores.some((s) => s.answeredCount > 0))
 
     if (perPeerScores.length === 0) return { scores: [], peerCount: 0 }

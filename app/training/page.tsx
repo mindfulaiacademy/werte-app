@@ -6,14 +6,9 @@ import { TRAINING_VALUES, TRAINING_DURATION_OPTIONS, DEFAULT_TRAINING_DURATION, 
 import { getTrainingState, startTraining } from '@/lib/training'
 import { syncToSupabase } from '@/lib/sync'
 import { getAnswers, computeScores } from '@/lib/survey'
+import { useLanguage } from '@/lib/i18n'
 
 type Step = 'value' | 'topic' | 'duration' | 'self' | 'target' | 'confirm'
-
-const DIMENSION_LABELS: Record<string, string> = {
-  IDENTITY: 'Identität',
-  COMMUNITY: 'Gemeinschaft',
-  SOCIALITY: 'Gesellschaft',
-}
 
 const DIMENSION_COLORS: Record<string, string> = {
   IDENTITY: '#FFD21F',
@@ -23,6 +18,12 @@ const DIMENSION_COLORS: Record<string, string> = {
 
 export default function TrainingSetupPage() {
   const router = useRouter()
+  const { lang, tr, t } = useLanguage()
+  const DIMENSION_LABELS: Record<string, string> = {
+    IDENTITY: t.ergebnis.identity[lang],
+    COMMUNITY: t.ergebnis.community[lang],
+    SOCIALITY: t.ergebnis.sociality[lang],
+  }
   const [step, setStep] = useState<Step>('value')
   const [selectedValueKey, setSelectedValueKey] = useState<string | null>(null)
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null)
@@ -40,17 +41,17 @@ export default function TrainingSetupPage() {
 
   useEffect(() => {
     if (!selectedValueKey) return
-    const scores = computeScores(getAnswers())
+    const scores = computeScores(getAnswers(), lang)
     const result = scores.find((s) => s.valueKey === selectedValueKey)
     if (result && result.answeredCount > 0) {
       const surveyScore = Math.min(10, Math.round(result.score * 2))
       setSelfScore(surveyScore)
       setSelfScoreFromSurvey(true)
-      setTargetScore((t) => Math.max(t, surveyScore))
+      setTargetScore((prev) => Math.max(prev, surveyScore))
     } else {
       setSelfScoreFromSurvey(false)
     }
-  }, [selectedValueKey])
+  }, [selectedValueKey, lang])
 
   const selectedValue = TRAINING_VALUES.find((v) => v.key === selectedValueKey)
   const selectedTopic = selectedValue?.topics.find((t) => t.id === selectedTopicId)
@@ -87,7 +88,7 @@ export default function TrainingSetupPage() {
         className="text-sm font-semibold mb-8 text-left"
         style={{ color: 'var(--text-muted)' }}
       >
-        ← Zurück
+        {t.training.back[lang]}
       </button>
 
       {/* Step: Value selection */}
@@ -95,10 +96,10 @@ export default function TrainingSetupPage() {
         <div className="flex flex-col gap-6 flex-1">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-              Modul 2
+              {t.training.module2[lang]}
             </p>
             <h1 className="text-2xl font-black" style={{ color: 'var(--text)' }}>
-              Welchen Wert willst du trainieren?
+              {t.training.valueStepHeading[lang]}
             </h1>
           </div>
           {dimensions.map((dim) => (
@@ -117,7 +118,7 @@ export default function TrainingSetupPage() {
                   style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                 >
                   <span className="text-2xl">{value.emoji}</span>
-                  <p className="font-bold text-sm" style={{ color: 'var(--text)' }}>{value.name}</p>
+                  <p className="font-bold text-sm" style={{ color: 'var(--text)' }}>{tr(value.name)}</p>
                 </button>
               ))}
             </div>
@@ -130,10 +131,10 @@ export default function TrainingSetupPage() {
         <div className="flex flex-col gap-6 flex-1">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-              {selectedValue.emoji} {selectedValue.name}
+              {selectedValue.emoji} {tr(selectedValue.name)}
             </p>
             <h1 className="text-2xl font-black" style={{ color: 'var(--text)' }}>
-              Wie willst du trainieren?
+              {t.training.topicStepHeading[lang]}
             </h1>
           </div>
           <div className="flex flex-col gap-3">
@@ -149,8 +150,8 @@ export default function TrainingSetupPage() {
               >
                 <span className="text-2xl">{topic.emoji}</span>
                 <div>
-                  <p className="font-bold text-sm" style={{ color: 'var(--text)' }}>{topic.title}</p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{topic.subtitle}</p>
+                  <p className="font-bold text-sm" style={{ color: 'var(--text)' }}>{tr(topic.title)}</p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{tr(topic.subtitle)}</p>
                 </div>
               </button>
             ))}
@@ -163,10 +164,10 @@ export default function TrainingSetupPage() {
         <div className="flex flex-col gap-6 flex-1">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-              {selectedTopic.emoji} {selectedTopic.title}
+              {selectedTopic.emoji} {tr(selectedTopic.title)}
             </p>
             <h1 className="text-2xl font-black" style={{ color: 'var(--text)' }}>
-              Wie lange willst du trainieren?
+              {t.training.durationStepHeading[lang]}
             </h1>
           </div>
           <div className="flex flex-col gap-3">
@@ -180,8 +181,8 @@ export default function TrainingSetupPage() {
                 className="w-full text-left rounded-xl p-4 transition-all active:scale-95"
                 style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
               >
-                <p className="font-black text-lg mb-1" style={{ color: 'var(--text)' }}>{option.label}</p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{option.neuroFakt}</p>
+                <p className="font-black text-lg mb-1" style={{ color: 'var(--text)' }}>{tr(option.label)}</p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{tr(option.neuroFakt)}</p>
               </button>
             ))}
           </div>
@@ -195,13 +196,13 @@ export default function TrainingSetupPage() {
             <>
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-                  {selectedTopic.emoji} {selectedTopic.title}
+                  {selectedTopic.emoji} {tr(selectedTopic.title)}
                 </p>
                 <h1 className="text-2xl font-black mb-1" style={{ color: 'var(--text)' }}>
-                  Hier stehst du gerade beim Wert „{selectedValue.name}“
+                  {t.training.selfHeadingFromSurvey[lang]} „{tr(selectedValue.name)}“
                 </h1>
                 <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                  Basierend auf deiner Selbsteinschätzung.
+                  {t.training.selfSubFromSurvey[lang]}
                 </p>
               </div>
 
@@ -211,10 +212,10 @@ export default function TrainingSetupPage() {
                   style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                 >
                   <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
-                    Dein Level
+                    {t.training.yourLevel[lang]}
                   </p>
                   <p className="font-black text-lg" style={{ color: 'var(--text)' }}>
-                    {selfLevel.emoji} {selfLevel.label} ({selfScore}/10)
+                    {selfLevel.emoji} {tr(selfLevel.label)} ({selfScore}/10)
                   </p>
                 </div>
               )}
@@ -223,17 +224,17 @@ export default function TrainingSetupPage() {
             <>
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-                  {selectedTopic.emoji} {selectedTopic.title}
+                  {selectedTopic.emoji} {tr(selectedTopic.title)}
                 </p>
                 <h1 className="text-2xl font-black mb-1" style={{ color: 'var(--text)' }}>
-                  Wo stehst du gerade?
+                  {t.training.selfHeading[lang]}
                 </h1>
                 <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                  Sei ehrlich — kein Richtig oder Falsch.
+                  {t.training.selfSub[lang]}
                 </p>
               </div>
 
-              <ScoreSelector value={selfScore} onChange={setSelfScore} />
+              <ScoreSelector value={selfScore} onChange={setSelfScore} labels={[t.training.scoreMin[lang], t.training.scoreMax[lang]]} />
 
               {selfLevel && (
                 <div
@@ -241,10 +242,10 @@ export default function TrainingSetupPage() {
                   style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
                 >
                   <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
-                    Dein Level
+                    {t.training.yourLevel[lang]}
                   </p>
                   <p className="font-black text-lg" style={{ color: 'var(--text)' }}>
-                    {selfLevel.emoji} {selfLevel.label}
+                    {selfLevel.emoji} {tr(selfLevel.label)}
                   </p>
                 </div>
               )}
@@ -257,7 +258,7 @@ export default function TrainingSetupPage() {
               className="w-full py-4 font-black text-lg rounded-xl transition-all active:scale-95"
               style={{ background: 'var(--accent)', color: 'var(--accent-text)', borderRadius: 'var(--btn-radius)' }}
             >
-              Weiter →
+              {t.training.next[lang]}
             </button>
           </div>
         </div>
@@ -268,17 +269,17 @@ export default function TrainingSetupPage() {
         <div className="flex flex-col gap-6 flex-1">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-              {selectedTopic.emoji} {selectedTopic.title}
+              {selectedTopic.emoji} {tr(selectedTopic.title)}
             </p>
             <h1 className="text-2xl font-black mb-1" style={{ color: 'var(--text)' }}>
-              Wo willst du hin?
+              {t.training.targetHeading[lang]}
             </h1>
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              Dein Ziel für die nächsten {durationDays} Tage.
+              {t.training.targetSub[lang]} {durationDays} {t.training.targetSubDays[lang]}
             </p>
           </div>
 
-          <ScoreSelector value={targetScore} onChange={setTargetScore} min={selfScore} />
+          <ScoreSelector value={targetScore} onChange={setTargetScore} min={selfScore} labels={[t.training.scoreMin[lang], t.training.scoreMax[lang]]} />
 
           {targetLevel && (
             <div
@@ -286,10 +287,10 @@ export default function TrainingSetupPage() {
               style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
             >
               <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
-                Ziel-Level
+                {t.training.targetLevel[lang]}
               </p>
               <p className="font-black text-lg" style={{ color: 'var(--text)' }}>
-                {targetLevel.emoji} {targetLevel.label}
+                {targetLevel.emoji} {tr(targetLevel.label)}
               </p>
             </div>
           )}
@@ -300,7 +301,7 @@ export default function TrainingSetupPage() {
               className="w-full py-4 font-black text-lg rounded-xl transition-all active:scale-95"
               style={{ background: 'var(--accent)', color: 'var(--accent-text)', borderRadius: 'var(--btn-radius)' }}
             >
-              Weiter →
+              {t.training.next[lang]}
             </button>
           </div>
         </div>
@@ -311,19 +312,19 @@ export default function TrainingSetupPage() {
         <div className="flex flex-col gap-6 flex-1">
           <div>
             <h1 className="text-2xl font-black mb-1" style={{ color: 'var(--text)' }}>
-              Dein Trainingsplan
+              {t.training.planHeading[lang]}
             </h1>
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              {durationDays} Tage · täglich 1 Micro-Challenge
+              {durationDays} {t.training.planSub[lang]}
             </p>
           </div>
 
           <div className="flex flex-col gap-3">
-            <SummaryRow label="Thema" value={`${selectedTopic.emoji} ${selectedTopic.title}`} />
-            <SummaryRow label="Dein Start" value={`${selfLevel.emoji} ${selfLevel.label} (${selfScore}/10)`} />
-            <SummaryRow label="Dein Ziel" value={`${targetLevel.emoji} ${targetLevel.label} (${targetScore}/10)`} />
-            <SummaryRow label="Dauer" value={`${durationDays} Tage`} />
-            <SummaryRow label="Punkte möglich" value={`${durationDays * POINTS_PER_DAY} Punkte`} />
+            <SummaryRow label={t.training.summaryTopic[lang]} value={`${selectedTopic.emoji} ${tr(selectedTopic.title)}`} />
+            <SummaryRow label={t.training.summaryStart[lang]} value={`${selfLevel.emoji} ${tr(selfLevel.label)} (${selfScore}/10)`} />
+            <SummaryRow label={t.training.summaryGoal[lang]} value={`${targetLevel.emoji} ${tr(targetLevel.label)} (${targetScore}/10)`} />
+            <SummaryRow label={t.training.summaryDuration[lang]} value={`${durationDays} ${t.training.summaryDurationDays[lang]}`} />
+            <SummaryRow label={t.training.summaryPointsPossible[lang]} value={`${durationDays * POINTS_PER_DAY} ${t.training.summaryPoints[lang]}`} />
           </div>
 
           <div className="mt-auto">
@@ -332,7 +333,7 @@ export default function TrainingSetupPage() {
               className="w-full py-4 font-black text-lg rounded-xl transition-all active:scale-95"
               style={{ background: 'var(--accent)', color: 'var(--accent-text)', borderRadius: 'var(--btn-radius)' }}
             >
-              Training starten →
+              {t.training.startTraining[lang]}
             </button>
           </div>
         </div>
@@ -341,7 +342,7 @@ export default function TrainingSetupPage() {
   )
 }
 
-function ScoreSelector({ value, onChange, min = 0 }: { value: number; onChange: (v: number) => void; min?: number }) {
+function ScoreSelector({ value, onChange, min = 0, labels = ['0', '10'] }: { value: number; onChange: (v: number) => void; min?: number; labels?: [string, string] | string[] }) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex justify-between text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
@@ -359,8 +360,8 @@ function ScoreSelector({ value, onChange, min = 0 }: { value: number; onChange: 
         style={{ accentColor: 'var(--accent)' }}
       />
       <div className="flex justify-between text-xs" style={{ color: 'var(--text-muted)' }}>
-        <span>gar nicht</span>
-        <span>richtig stark</span>
+        <span>{labels[0]}</span>
+        <span>{labels[1]}</span>
       </div>
     </div>
   )

@@ -11,9 +11,11 @@ import {
   type TrainingState,
 } from '@/lib/training'
 import { getOrCreateSessionId } from '@/lib/sync'
+import { useLanguage } from '@/lib/i18n'
 
 export default function TrainingAbschlussPage() {
   const router = useRouter()
+  const { lang, t, tr } = useLanguage()
   const [state, setState] = useState<TrainingState | null>(null)
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export default function TrainingAbschlussPage() {
   const doneCount = state.checkins.filter((c) => c === true).length
   const targetLevel = topic.levels[getLevelForScore(state.targetScore)]
   const pct = Math.round((totalPoints / maxPoints) * 100)
-  const headline = durationDays === 7 ? 'Woche abgeschlossen!' : durationDays === 21 ? '21-Tage-Runde abgeschlossen!' : 'Training abgeschlossen!'
+  const headline = durationDays === 7 ? t.trainingDone.weekDone[lang] : durationDays === 21 ? t.trainingDone.round21Done[lang] : t.trainingDone.trainingDone[lang]
 
   function handleRestart() {
     resetTraining()
@@ -62,7 +64,7 @@ export default function TrainingAbschlussPage() {
           {headline}
         </h1>
         <p className="text-base" style={{ color: 'var(--text-muted)' }}>
-          {topic.emoji} {topic.title} · {durationDays} Tage
+          {topic.emoji} {tr(topic.title)} · {durationDays} {t.trainingDone.days[lang]}
         </p>
       </div>
 
@@ -72,13 +74,13 @@ export default function TrainingAbschlussPage() {
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
       >
         <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
-          Deine Punkte
+          {t.trainingDone.yourPoints[lang]}
         </p>
         <p className="text-5xl font-black mb-1" style={{ color: '#16a34a' }}>
           {totalPoints}
         </p>
         <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          von {maxPoints} möglichen · {doneCount} von {durationDays} Tagen erfüllt
+          {t.trainingDone.ofPossible[lang]} {maxPoints} {t.trainingDone.possiblePoints[lang]} · {doneCount} {t.trainingDone.daysCompleted[lang]} {durationDays} {t.trainingDone.daysMet[lang]}
         </p>
       </div>
 
@@ -88,7 +90,7 @@ export default function TrainingAbschlussPage() {
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
       >
         <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
-          Dein Verlauf
+          {t.trainingDone.yourHistory[lang]}
         </p>
         <div className="grid grid-cols-7 gap-1.5">
           {state.checkins.map((checkin, i) => (
@@ -109,10 +111,10 @@ export default function TrainingAbschlussPage() {
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
       >
         <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: 'var(--text-muted)' }}>
-          Dein Ziel war
+          {t.trainingDone.yourGoalWas[lang]}
         </p>
         <p className="font-black text-base" style={{ color: 'var(--text)' }}>
-          {targetLevel.emoji} {targetLevel.label} ({state.targetScore}/10)
+          {targetLevel.emoji} {tr(targetLevel.label)} ({state.targetScore}/10)
         </p>
       </div>
 
@@ -123,7 +125,7 @@ export default function TrainingAbschlussPage() {
           className="w-full py-4 font-black text-lg rounded-xl transition-all active:scale-95"
           style={{ background: 'var(--accent)', color: 'var(--accent-text)', borderRadius: 'var(--btn-radius)' }}
         >
-          Neue Runde starten →
+          {t.trainingDone.newRound[lang]}
         </button>
         <button
           onClick={() => router.push('/')}
@@ -135,7 +137,7 @@ export default function TrainingAbschlussPage() {
             borderRadius: 'var(--btn-radius)',
           }}
         >
-          Zurück zur Startseite
+          {t.trainingDone.backHome[lang]}
         </button>
       </div>
     </div>

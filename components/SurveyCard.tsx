@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { Question } from '@/data/questions'
+import { useLanguage } from '@/lib/i18n'
 
 interface Props {
   question: Question
@@ -12,11 +13,11 @@ interface Props {
 }
 
 const EMOJIS = ['😐', '🙂', '😊', '😄', '😍']
-const LABEL_LEFT = 'gar nicht wichtig'
-const LABEL_RIGHT = 'mega wichtig'
 
-export default function SurveyCard({ question, current, total, onAnswer, promptText = 'Was ist dir wichtig?' }: Props) {
+export default function SurveyCard({ question, current, total, onAnswer, promptText }: Props) {
+  const { lang, t, tr } = useLanguage()
   const [selected, setSelected] = useState<number | null>(null)
+  const resolvedPrompt = promptText ?? t.survey.promptText[lang]
   const progress = ((current - 1) / total) * 100
 
   function handleSelect(value: number) {
@@ -56,12 +57,12 @@ export default function SurveyCard({ question, current, total, onAnswer, promptT
 
           {/* Prompt */}
           <p className="text-xs font-semibold uppercase tracking-widest text-center" style={{ color: 'var(--text-muted)' }}>
-            {promptText}
+            {resolvedPrompt}
           </p>
 
           {/* Question text */}
           <p className="text-lg font-semibold leading-snug text-center" style={{ color: 'var(--text)' }}>
-            {question.text}
+            {tr(question.text)}
           </p>
 
           {/* Scale */}
@@ -95,8 +96,8 @@ export default function SurveyCard({ question, current, total, onAnswer, promptT
 
             {/* Scale labels */}
             <div className="flex justify-between px-1">
-              <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{LABEL_LEFT}</span>
-              <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{LABEL_RIGHT}</span>
+              <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{t.surveyCard.labelLeft[lang]}</span>
+              <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{t.surveyCard.labelRight[lang]}</span>
             </div>
           </div>
         </div>

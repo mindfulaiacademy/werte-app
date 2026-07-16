@@ -1,4 +1,5 @@
 import { QUESTIONS, VALUES, type Question } from '@/data/questions'
+import type { Lang } from '@/lib/i18n'
 
 const ANSWERS_KEY = 'wt_answers_v2'
 const ORDER_KEY = 'wt_order_v2'
@@ -104,7 +105,7 @@ export interface ScoreResult {
   answeredCount: number // out of 5
 }
 
-export function computeScores(answers: Answers): ScoreResult[] {
+export function computeScores(answers: Answers, lang: Lang = 'en'): ScoreResult[] {
   return VALUES.map((v) => {
     const qs = QUESTIONS.filter((q) => q.valueKey === v.key)
     const answered = qs.map((q) => answers[q.id]).filter((n) => typeof n === 'number')
@@ -114,7 +115,7 @@ export function computeScores(answers: Answers): ScoreResult[] {
         : 0
     return {
       valueKey: v.key,
-      valueName: v.name,
+      valueName: v.name[lang],
       dimension: v.dimension,
       score: Math.round(avg * 10) / 10,
       max: 5,

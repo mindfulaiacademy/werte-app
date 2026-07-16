@@ -14,11 +14,13 @@ import {
   TOTAL_QUESTIONS,
 } from '@/lib/peerSurvey'
 import type { Question } from '@/data/questions'
+import { useLanguage } from '@/lib/i18n'
 
 type Screen = 'start' | 'survey'
 
 export default function PeerSurveyPage() {
   const router = useRouter()
+  const { lang, t } = useLanguage()
   const params = useParams<{ ownerId: string }>()
   const ownerId = params.ownerId
   const [screen, setScreen] = useState<Screen>('start')
@@ -77,13 +79,13 @@ export default function PeerSurveyPage() {
           <div className="text-center">
             <div className="text-6xl mb-6 emoji-bounce">🤝</div>
             <p className="text-sm font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
-              Fremdeinschätzung
+              {t.peer.eyebrow[lang]}
             </p>
             <h1 className="text-3xl font-black leading-tight mb-4" style={{ color: 'var(--text)' }}>
-              Du wurdest gebeten, jemanden einzuschätzen.
+              {t.peer.heading[lang]}
             </h1>
             <p className="text-xl font-bold mb-4" style={{ color: 'var(--text-muted)' }}>
-              Deine Antworten sind anonym.
+              {t.peer.sub[lang]}
             </p>
           </div>
 
@@ -94,7 +96,7 @@ export default function PeerSurveyPage() {
             <div className="flex items-start gap-3">
               <span className="text-xl">⚡</span>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                <strong style={{ color: 'var(--text)' }}>Spontan antworten.</strong> Wie erlebst du diese Person wirklich?
+                <strong style={{ color: 'var(--text)' }}>{t.peer.hintStrong[lang]}</strong> {t.peer.hintText[lang]}
               </p>
             </div>
           </div>
@@ -109,7 +111,7 @@ export default function PeerSurveyPage() {
             borderRadius: 'var(--btn-radius)',
           }}
         >
-          Los geht's →
+          {t.peer.startButton[lang]}
         </button>
       </div>
     )
@@ -128,7 +130,7 @@ export default function PeerSurveyPage() {
       current={positionInRound}
       total={ROUND_SIZE}
       onAnswer={handleAnswer}
-      promptText="Wie schätzt du diese Person ein?"
+      promptText={t.peer.promptText[lang]}
     />
   )
 }

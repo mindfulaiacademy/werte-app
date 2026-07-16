@@ -14,11 +14,13 @@ import {
 } from '@/lib/survey'
 import type { Question } from '@/data/questions'
 import { syncToSupabase, getOrCreateSessionId } from '@/lib/sync'
+import { useLanguage } from '@/lib/i18n'
 
 type Screen = 'start' | 'survey'
 
 export default function SurveyPage() {
   const router = useRouter()
+  const { lang, t } = useLanguage()
   const [screen, setScreen] = useState<Screen>('start')
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -82,13 +84,13 @@ export default function SurveyPage() {
           <div className="text-center">
             <div className="text-6xl mb-6 emoji-bounce">🧭</div>
             <p className="text-sm font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--text-muted)' }}>
-              Finde es in 4 Minuten heraus
+              {t.survey.startEyebrow[lang]}
             </p>
             <h1 className="text-3xl font-black leading-tight mb-4" style={{ color: 'var(--text)' }}>
-              Was ist dir wichtig?
+              {t.survey.startHeading[lang]}
             </h1>
             <p className="text-xl font-bold mb-4" style={{ color: 'var(--text-muted)' }}>
-              Wirklich wichtig.
+              {t.survey.startSub[lang]}
             </p>
 
           </div>
@@ -100,7 +102,7 @@ export default function SurveyPage() {
             <div className="flex items-start gap-3">
               <span className="text-xl">⚡</span>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                <strong style={{ color: 'var(--text)' }}>Spontan antworten.</strong> Dein erster Gedanke ist der passendste.
+                <strong style={{ color: 'var(--text)' }}>{t.survey.hintStrong[lang]}</strong> {t.survey.hintText[lang]}
               </p>
             </div>
           </div>
@@ -115,7 +117,7 @@ export default function SurveyPage() {
             borderRadius: 'var(--btn-radius)',
           }}
         >
-          Los geht's →
+          {t.survey.startButton[lang]}
         </button>
       </div>
     )

@@ -14,42 +14,16 @@ import {
 } from '@/lib/survey'
 import { getOrCreateSessionId } from '@/lib/sync'
 import { fetchPeerAggregate, type PeerAggregate } from '@/lib/peerSurvey'
+import { useLanguage } from '@/lib/i18n'
 
 const DEMO_KEY = 'wt_demo'
 
 const WerteRadarChart = dynamic(() => import('@/components/WerteRadarChart'), { ssr: false })
 
-const DIMENSION_LABELS: Record<string, string> = {
-  IDENTITY: '🌱 Identität',
-  COMMUNITY: '🤝 Gemeinschaft',
-  SOCIALITY: '🌍 Gesellschaft',
-}
-
 const DIMENSION_COLORS: Record<string, string> = {
   IDENTITY: '#FFD21F',
   COMMUNITY: '#ef4444',
   SOCIALITY: '#14b8a6',
-}
-
-const ROUND_CONFIG = {
-  1: {
-    label: 'Erste Selbsteinschätzung',
-    sublabel: 'Basiert auf 20 von 60 Fragen.',
-    nextLabel: 'Runde 2 starten',
-    nextRound: true,
-  },
-  2: {
-    label: 'Dein Profil wächst',
-    sublabel: 'Basiert auf 40 von 60 Fragen.',
-    nextLabel: 'Runde 3 starten',
-    nextRound: true,
-  },
-  3: {
-    label: 'Dein vollständiges Profil',
-    sublabel: 'Alle 60 Fragen beantwortet.',
-    nextLabel: null,
-    nextRound: false,
-  },
 }
 
 function ScoreTile({ result }: { result: ScoreResult }) {
@@ -81,6 +55,7 @@ function ScoreTile({ result }: { result: ScoreResult }) {
 
 export default function ErgebnisPage() {
   const router = useRouter()
+  const { lang, t } = useLanguage()
   const [scores, setScores] = useState<ScoreResult[]>([])
   const [round, setRound] = useState<1 | 2 | 3>(1)
   const [peerAggregate, setPeerAggregate] = useState<PeerAggregate>({ scores: [], peerCount: 0 })
@@ -92,12 +67,12 @@ export default function ErgebnisPage() {
       router.replace('/survey')
       return
     }
-    setScores(computeScores(answers))
+    setScores(computeScores(answers, lang))
     setRound(getRound(answers))
 
     const sessionId = getOrCreateSessionId()
-    fetchPeerAggregate(sessionId).then(setPeerAggregate)
-  }, [router])
+    fetchPeerAggregate(sessionId, lang).then(setPeerAggregate)
+  }, [router, lang])
 
   async function handleGetPeerFeedback() {
     const sessionId = getOrCreateSessionId()
@@ -105,7 +80,7 @@ export default function ErgebnisPage() {
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Fremdeinschätzung', text: 'Schätze mich in wenigen Minuten anonym ein:', url: link })
+        await navigator.share({ title: t.ergebnis.shareTitle[lang], text: t.ergebnis.shareText[lang], url: link })
         return
       } catch {
         // user cancelled or share failed — fall back to clipboard
@@ -133,6 +108,16 @@ export default function ErgebnisPage() {
 
   if (scores.length === 0) return null
 
+  const ROUND_CONFIG = {
+    1: { label: t.ergebnis.round1Label[lang], sublabel: t.ergebnis.round1Sub[lang], nextLabel: t.ergebnis.round1Next[lang], nextRound: true },
+    2: { label: t.ergebnis.round2Label[lang], sublabel: t.ergebnis.round2Sub[lang], nextLabel: t.ergebnis.round2Next[lang], nextRound: true },
+    3: { label: t.ergebnis.round3Label[lang], sublabel: t.ergebnis.round3Sub[lang], nextLabel: null as string | null, nextRound: false },
+  }
+  const DIMENSION_LABELS: Record<string, string> = {
+    IDENTITY: t.ergebnis.identityLabel[lang],
+    COMMUNITY: t.ergebnis.communityLabel[lang],
+    SOCIALITY: t.ergebnis.socialityLabel[lang],
+  }
   const config = ROUND_CONFIG[round]
   const dimensions = ['IDENTITY', 'COMMUNITY', 'SOCIALITY'] as const
   const byDimension = (dim: string) => scores.filter((s) => s.dimension === dim)
@@ -145,10 +130,10 @@ export default function ErgebnisPage() {
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
             style={{ background: 'var(--accent)', color: 'var(--accent-text)' }}>
-            Runde {round} / 3
+            {t.ergebnis.round[lang]} {round} / 3
           </span>
           <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            {answeredTotal} / {TOTAL_QUESTIONS} Fragen
+            {answeredTotal} / {TOTAL_QUESTIONS} {t.ergebnis.questionsShort[lang]}
           </span>
         </div>
         <h1 className="text-2xl font-black" style={{ color: 'var(--text)' }}>
@@ -166,13 +151,13 @@ export default function ErgebnisPage() {
       >
         <p className="text-xs font-semibold uppercase tracking-widest text-center mb-2"
           style={{ color: 'var(--text-muted)' }}>
-          Ergebnis Heatmap
+          {t.ergebnis.heatmapTitle[lang]}
         </p>
 
         <WerteRadarChart
           scores={scores}
           compareScores={peerAggregate.peerCount > 0 ? peerAggregate.scores : undefined}
-          compareLabel={`Fremdeinschätzung (Ø von ${peerAggregate.peerCount})`}
+          compareLabel={`${t.ergebnis.peerCompareLabelAvg[lang]} ${peerAggregate.peerCount})`}
         />
 
         {/* Legend */}
@@ -181,7 +166,7 @@ export default function ErgebnisPage() {
             <div key={dim} className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-full" style={{ background: DIMENSION_COLORS[dim] }} />
               <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-                {dim === 'IDENTITY' ? 'Identität' : dim === 'COMMUNITY' ? 'Gemeinschaft' : 'Gesellschaft'}
+                {dim === 'IDENTITY' ? t.ergebnis.identity[lang] : dim === 'COMMUNITY' ? t.ergebnis.community[lang] : t.ergebnis.sociality[lang]}
               </span>
             </div>
           ))}
@@ -189,7 +174,7 @@ export default function ErgebnisPage() {
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-full" style={{ background: '#6366f1' }} />
               <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-                Fremdeinschätzung (Ø von {peerAggregate.peerCount})
+                {t.ergebnis.peerCompareLabelAvg[lang]} {peerAggregate.peerCount})
               </span>
             </div>
           )}
@@ -241,7 +226,7 @@ export default function ErgebnisPage() {
             borderRadius: 'var(--btn-radius)',
           }}
         >
-          Abschließen und Werte-Training starten
+          {t.ergebnis.finishTraining[lang]}
         </button>
 
         <button
@@ -254,7 +239,7 @@ export default function ErgebnisPage() {
             borderRadius: 'var(--btn-radius)',
           }}
         >
-          {shareStatus === 'copied' ? 'Link kopiert ✓' : 'Fremdeinschätzung bekommen'}
+          {shareStatus === 'copied' ? t.ergebnis.linkCopied[lang] : t.ergebnis.getPeerFeedback[lang]}
         </button>
 
         <button
@@ -267,7 +252,7 @@ export default function ErgebnisPage() {
             borderRadius: 'var(--btn-radius)',
           }}
         >
-          Von vorne beginnen
+          {t.ergebnis.restart[lang]}
         </button>
       </div>
     </div>

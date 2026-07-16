@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from 'next'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { LanguageProvider } from '@/lib/i18n'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Wertetraining',
-  description: 'Entdecke deine Werte',
+  title: 'Values Training',
+  description: 'Discover your values',
   robots: 'noindex, nofollow',
 }
 
@@ -18,11 +20,14 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="de" data-theme="jobfire">
+    <html lang="en" data-theme="jobfire">
       <body className="antialiased">
-        <div className="mx-auto max-w-md min-h-screen">
-          {children}
-        </div>
+        <LanguageProvider>
+          <LanguageSwitcher />
+          <div className="mx-auto max-w-md min-h-screen">
+            {children}
+          </div>
+        </LanguageProvider>
         <Analytics />
         <SpeedInsights />
       </body>
